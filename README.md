@@ -34,9 +34,10 @@ User continues to use our Calculator and wants to know the maximum prime number 
 ### Max prime number
 
 Button "P" calculates the maximum Prime number of two provided numbers. For example:
-- 3 P 13 = 13
-- 20 P 25 = 23
-- 20 P 19 = NaN
+
+* 3 P 13 = 13
+* 20 P 25 = 23
+* 20 P 19 = NaN
 
 ## 💸 Currency
 
