@@ -1,35 +1,61 @@
-/* global AbortController */
 import { useState, useEffect, useCallback, useRef } from "react";
 import { apiRequest, handleApiError, retryRequest } from "../utils/apiHelpers";
+
+/**
+ * Options for API request
+ */
+export interface ApiOptions extends RequestInit {
+  signal?: AbortSignal;
+}
+
+/**
+ * Return type for useApi hook
+ */
+export interface UseApiReturn<T> {
+  /** Response data from the API */
+  data: T | null;
+  /** Loading state indicator */
+  loading: boolean;
+  /** Error message if request failed */
+  error: string | null;
+  /** Execute the API request manually */
+  execute: (url?: string, options?: ApiOptions) => Promise<T | undefined>;
+  /** Reset hook state to initial values */
+  reset: () => void;
+}
 
 /**
  * Custom hook for API requests with loading and error states
  * Provides a clean interface for making API calls with automatic state management
  * Includes request cancellation and race condition prevention
  *
- * @param {string} url - The API endpoint URL (optional, can be provided in execute)
- * @param {Object} options - Fetch options (method, headers, body, etc.)
- * @param {boolean} immediate - Whether to execute the request immediately on mount
- * @returns {Object} - { data, loading, error, execute, reset }
+ * @param url - The API endpoint URL (optional, can be provided in execute)
+ * @param options - Fetch options (method, headers, body, etc.)
+ * @param immediate - Whether to execute the request immediately on mount
+ * @returns Object with data, loading, error, execute, and reset
  */
-function useApi(url = null, options = {}, immediate = false) {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+function useApi<T = unknown>(
+  url: string | null = null,
+  options: ApiOptions = {},
+  immediate: boolean = false
+): UseApiReturn<T> {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Track current request to prevent race conditions
-  const requestIdRef = useRef(0);
-  const abortControllerRef = useRef(null);
+  const requestIdRef = useRef<number>(0);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Use ref for options to avoid dependency issues
-  const optionsRef = useRef(options);
+  const optionsRef = useRef<ApiOptions>(options);
   useEffect(() => {
     optionsRef.current = options;
   });
 
   // Execute the API request
   const execute = useCallback(
-    async (executeUrl = url, executeOptions = optionsRef.current) => {
+    async (executeUrl: string = url || '', executeOptions: ApiOptions = optionsRef.current): Promise<T | undefined> => {
       if (!executeUrl) {
         console.error("useApi: No URL provided");
         setError("No URL provided");
@@ -53,14 +79,14 @@ function useApi(url = null, options = {}, immediate = false) {
 
       try {
         // Use retryRequest to handle transient failures
-        const result = await retryRequest(
+        const result = await retryRequest<T>(
           () =>
-            apiRequest(executeUrl, {
+            apiRequest<T>(executeUrl, {
               ...executeOptions,
               signal: abortController.signal,
             }),
           3, // retries
-          1000, // delay
+          1000 // delay
         );
 
         // Only update state if this is still the latest request
@@ -80,7 +106,7 @@ function useApi(url = null, options = {}, immediate = false) {
         throw err;
       }
     },
-    [url],
+    [url]
   );
 
   // Reset the hook state
@@ -115,7 +141,7 @@ function useApi(url = null, options = {}, immediate = false) {
       }
     };
 
-    runRequest();
+    void runRequest();
     // Note: execute is included in dependencies. Since execute is memoized with useCallback
     // and depends on url/options, the effect will re-run when url or options change.
     // Cleanup is handled by the separate unmount effect and within execute() itself

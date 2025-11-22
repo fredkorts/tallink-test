@@ -5,16 +5,16 @@ import useLocalStorage from "../useLocalStorage";
 describe("useLocalStorage", () => {
   // Mock localStorage
   const localStorageMock = (() => {
-    let store = {};
+    let store: Record<string, string> = {};
     return {
-      getItem: (key) => store[key] || null,
-      setItem: (key, value) => {
+      getItem: (key: string): string | null => store[key] || null,
+      setItem: (key: string, value: string): void => {
         store[key] = value.toString();
       },
-      removeItem: (key) => {
+      removeItem: (key: string): void => {
         delete store[key];
       },
-      clear: () => {
+      clear: (): void => {
         store = {};
       },
     };
@@ -58,23 +58,28 @@ describe("useLocalStorage", () => {
   });
 
   it("works with objects", () => {
-    const initialObject = { name: "John", age: 30 };
-    const { result } = renderHook(() => useLocalStorage("test-key", initialObject));
+    interface TestObject {
+      name: string;
+      age: number;
+    }
+
+    const initialObject: TestObject = { name: "John", age: 30 };
+    const { result } = renderHook(() => useLocalStorage<TestObject>("test-key", initialObject));
 
     expect(result.current[0]).toEqual(initialObject);
 
-    const newObject = { name: "Jane", age: 25 };
+    const newObject: TestObject = { name: "Jane", age: 25 };
     act(() => {
       result.current[1](newObject);
     });
 
     expect(result.current[0]).toEqual(newObject);
-    expect(JSON.parse(localStorageMock.getItem("test-key"))).toEqual(newObject);
+    expect(JSON.parse(localStorageMock.getItem("test-key")!)).toEqual(newObject);
   });
 
   it("works with arrays", () => {
     const initialArray = [1, 2, 3];
-    const { result } = renderHook(() => useLocalStorage("test-key", initialArray));
+    const { result } = renderHook(() => useLocalStorage<number[]>("test-key", initialArray));
 
     expect(result.current[0]).toEqual(initialArray);
 
@@ -84,11 +89,11 @@ describe("useLocalStorage", () => {
     });
 
     expect(result.current[0]).toEqual(newArray);
-    expect(JSON.parse(localStorageMock.getItem("test-key"))).toEqual(newArray);
+    expect(JSON.parse(localStorageMock.getItem("test-key")!)).toEqual(newArray);
   });
 
   it("supports functional updates like useState", () => {
-    const { result } = renderHook(() => useLocalStorage("counter", 0));
+    const { result } = renderHook(() => useLocalStorage<number>("counter", 0));
 
     act(() => {
       result.current[1]((prev) => prev + 1);

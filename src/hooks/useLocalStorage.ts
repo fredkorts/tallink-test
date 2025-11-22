@@ -1,17 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Dispatch, SetStateAction } from "react";
 
 /**
  * Custom hook for localStorage with state synchronization
  * Automatically syncs state with localStorage and handles JSON parsing/stringifying
  *
- * @param {string} key - The localStorage key
- * @param {*} initialValue - The initial value if no stored value exists
- * @returns {[*, Function]} - Returns [storedValue, setValue] tuple like useState
+ * @param key - The localStorage key
+ * @param initialValue - The initial value if no stored value exists
+ * @returns Tuple of [storedValue, setValue] like useState
  */
-function useLocalStorage(key, initialValue) {
+function useLocalStorage<T>(
+  key: string,
+  initialValue: T
+): [T, Dispatch<SetStateAction<T>>] {
   // State to store our value
   // Pass initial state function to useState so logic is only executed once
-  const [storedValue, setStoredValue] = useState(() => {
+  const [storedValue, setStoredValue] = useState<T>(() => {
     if (typeof window === "undefined") {
       return initialValue;
     }
@@ -20,7 +23,7 @@ function useLocalStorage(key, initialValue) {
       // Get from local storage by key
       const item = window.localStorage.getItem(key);
       // Parse stored json or if none return initialValue
-      return item ? JSON.parse(item) : initialValue;
+      return item ? (JSON.parse(item) as T) : initialValue;
     } catch (error) {
       // If error also return initialValue
       console.error(`Error reading localStorage key "${key}":`, error);
@@ -30,11 +33,11 @@ function useLocalStorage(key, initialValue) {
 
   // Return a wrapped version of useState's setter function that
   // persists the new value to localStorage.
-  const setValue = (value) => {
+  const setValue: Dispatch<SetStateAction<T>> = (value) => {
     // Use functional form of setState to avoid race conditions
     setStoredValue((prev) => {
       // Allow value to be a function so we have same API as useState
-      const newValue = typeof value === "function" ? value(prev) : value;
+      const newValue = value instanceof Function ? value(prev) : value;
 
       // Save to local storage
       try {
@@ -56,7 +59,7 @@ function useLocalStorage(key, initialValue) {
       return;
     }
 
-    const handleStorageChange = (e) => {
+    const handleStorageChange = (e: StorageEvent) => {
       if (e.key === key) {
         if (e.newValue === null) {
           // Handle deletion: reset to initial value
@@ -64,7 +67,7 @@ function useLocalStorage(key, initialValue) {
         } else {
           // Handle update: parse and set new value
           try {
-            setStoredValue(JSON.parse(e.newValue));
+            setStoredValue(JSON.parse(e.newValue) as T);
           } catch (error) {
             console.error(`Error parsing storage event for key "${key}":`, error);
           }

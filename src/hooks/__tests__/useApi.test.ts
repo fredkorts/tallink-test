@@ -1,15 +1,25 @@
-/* global AbortSignal */
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import useApi from "../useApi";
+import type { ApiOptions } from "../useApi";
 import * as apiHelpers from "../../utils/apiHelpers";
 
 // Mock the apiHelpers module
 vi.mock("../../utils/apiHelpers", () => ({
   apiRequest: vi.fn(),
-  handleApiError: vi.fn((error) => error.message || "An error occurred"),
-  retryRequest: vi.fn((fn) => fn()),
+  handleApiError: vi.fn((error: unknown) => {
+    if (error instanceof Error) {
+      return error.message || "An error occurred";
+    }
+    return "An error occurred";
+  }),
+  retryRequest: vi.fn(<T,>(fn: () => Promise<T>) => fn()),
 }));
+
+interface MockData {
+  id: number;
+  name: string;
+}
 
 describe("useApi", () => {
   beforeEach(() => {
@@ -27,11 +37,11 @@ describe("useApi", () => {
   });
 
   it("sets loading to true when executing request", async () => {
-    apiHelpers.apiRequest.mockImplementation(() => new Promise(() => {})); // Never resolves
+    vi.mocked(apiHelpers.apiRequest).mockImplementation(() => new Promise(() => {})); // Never resolves
 
     const { result } = renderHook(() => useApi());
 
-    result.current.execute("/api/test");
+    void result.current.execute("/api/test");
 
     await waitFor(() => {
       expect(result.current.loading).toBe(true);
@@ -39,10 +49,10 @@ describe("useApi", () => {
   });
 
   it("sets data and loading false on successful request", async () => {
-    const mockData = { id: 1, name: "Test" };
-    apiHelpers.apiRequest.mockResolvedValue(mockData);
+    const mockData: MockData = { id: 1, name: "Test" };
+    vi.mocked(apiHelpers.apiRequest).mockResolvedValue(mockData);
 
-    const { result } = renderHook(() => useApi());
+    const { result } = renderHook(() => useApi<MockData>());
 
     await result.current.execute("/api/test");
 
@@ -55,8 +65,8 @@ describe("useApi", () => {
 
   it("sets error and loading false on failed request", async () => {
     const mockError = new Error("Network error");
-    apiHelpers.apiRequest.mockRejectedValue(mockError);
-    apiHelpers.handleApiError.mockReturnValue("Network error");
+    vi.mocked(apiHelpers.apiRequest).mockRejectedValue(mockError);
+    vi.mocked(apiHelpers.handleApiError).mockReturnValue("Network error");
 
     const { result } = renderHook(() => useApi());
 
@@ -74,10 +84,10 @@ describe("useApi", () => {
   });
 
   it("executes immediately when immediate is true", async () => {
-    const mockData = { id: 1, name: "Test" };
-    apiHelpers.apiRequest.mockResolvedValue(mockData);
+    const mockData: MockData = { id: 1, name: "Test" };
+    vi.mocked(apiHelpers.apiRequest).mockResolvedValue(mockData);
 
-    const { result } = renderHook(() => useApi("/api/test", {}, true));
+    const { result } = renderHook(() => useApi<MockData>("/api/test", {}, true));
 
     // Wait for initial loading to start
     await waitFor(() => {
@@ -91,7 +101,7 @@ describe("useApi", () => {
   });
 
   it("does not execute immediately when immediate is false", () => {
-    apiHelpers.apiRequest.mockResolvedValue({ id: 1 });
+    vi.mocked(apiHelpers.apiRequest).mockResolvedValue({ id: 1 });
 
     const { result } = renderHook(() => useApi("/api/test", {}, false));
 
@@ -100,11 +110,14 @@ describe("useApi", () => {
   });
 
   it("can execute with custom URL and options", async () => {
-    const mockData = { id: 2, name: "Custom" };
-    apiHelpers.apiRequest.mockResolvedValue(mockData);
+    const mockData: MockData = { id: 2, name: "Custom" };
+    vi.mocked(apiHelpers.apiRequest).mockResolvedValue(mockData);
 
-    const { result } = renderHook(() => useApi());
-    const customOptions = { method: "POST", body: JSON.stringify({ test: "data" }) };
+    const { result } = renderHook(() => useApi<MockData>());
+    const customOptions: ApiOptions = { 
+      method: "POST", 
+      body: JSON.stringify({ test: "data" }) 
+    };
 
     await result.current.execute("/api/custom", customOptions);
 
@@ -115,17 +128,17 @@ describe("useApi", () => {
           method: "POST",
           body: JSON.stringify({ test: "data" }),
           signal: expect.any(AbortSignal),
-        }),
+        })
       );
       expect(result.current.data).toEqual(mockData);
     });
   });
 
   it("reset clears all state", async () => {
-    const mockData = { id: 1, name: "Test" };
-    apiHelpers.apiRequest.mockResolvedValue(mockData);
+    const mockData: MockData = { id: 1, name: "Test" };
+    vi.mocked(apiHelpers.apiRequest).mockResolvedValue(mockData);
 
-    const { result } = renderHook(() => useApi());
+    const { result } = renderHook(() => useApi<MockData>());
 
     await result.current.execute("/api/test");
 
@@ -161,13 +174,13 @@ describe("useApi", () => {
   });
 
   it("uses retryRequest for failed requests", async () => {
-    const mockData = { id: 1, name: "Test" };
+    const mockData: MockData = { id: 1, name: "Test" };
     // Mock retryRequest to call the function it receives
-    apiHelpers.retryRequest.mockImplementation((fn) => fn());
+    vi.mocked(apiHelpers.retryRequest).mockImplementation(<T,>(fn: () => Promise<T>) => fn());
     // Mock apiRequest to return the data
-    apiHelpers.apiRequest.mockResolvedValue(mockData);
+    vi.mocked(apiHelpers.apiRequest).mockResolvedValue(mockData);
 
-    const { result } = renderHook(() => useApi());
+    const { result } = renderHook(() => useApi<MockData>());
 
     await result.current.execute("/api/test");
 
@@ -175,7 +188,7 @@ describe("useApi", () => {
       expect(apiHelpers.retryRequest).toHaveBeenCalledWith(
         expect.any(Function),
         expect.any(Number),
-        expect.any(Number),
+        expect.any(Number)
       );
       expect(result.current.data).toEqual(mockData);
     });

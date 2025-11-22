@@ -1,11 +1,10 @@
 /**
  * Generic API request helper with error handling
- * @param {string} url - The API endpoint URL
- * @param {Object} options - Fetch options
- * @returns {Promise<Object>} Response data
- * @throws {Error} If request fails
  */
-export async function apiRequest(url, options = {}) {
+export async function apiRequest<T = unknown>(
+  url: string,
+  options: RequestInit = {}
+): Promise<T> {
   try {
     const response = await fetch(url, {
       headers: {
@@ -20,7 +19,7 @@ export async function apiRequest(url, options = {}) {
     }
 
     const data = await response.json();
-    return data;
+    return data as T;
   } catch (error) {
     console.error("API request failed:", error);
     throw error;
@@ -29,19 +28,19 @@ export async function apiRequest(url, options = {}) {
 
 /**
  * Handle API errors and return user-friendly message
- * @param {Error} error - The error object
- * @returns {string} User-friendly error message
  */
-export function handleApiError(error) {
-  if (error.message.includes("fetch")) {
+export function handleApiError(error: unknown): string {
+  const errorMessage = error instanceof Error ? error.message : String(error);
+
+  if (errorMessage.includes("fetch")) {
     return "Unable to connect to server. Please check your connection.";
   }
 
-  if (error.message.includes("404")) {
+  if (errorMessage.includes("404")) {
     return "Resource not found.";
   }
 
-  if (error.message.includes("500")) {
+  if (errorMessage.includes("500")) {
     return "Server error. Please try again later.";
   }
 
@@ -50,12 +49,12 @@ export function handleApiError(error) {
 
 /**
  * Retry a failed API request
- * @param {Function} fn - The function to retry
- * @param {number} retries - Number of retry attempts
- * @param {number} delay - Delay between retries in ms
- * @returns {Promise<any>} Result of the function
  */
-export async function retryRequest(fn, retries = 3, delay = 1000) {
+export async function retryRequest<T>(
+  fn: () => Promise<T>,
+  retries: number = 3,
+  delay: number = 1000
+): Promise<T> {
   try {
     return await fn();
   } catch (error) {
@@ -63,12 +62,17 @@ export async function retryRequest(fn, retries = 3, delay = 1000) {
       throw error;
     }
 
+    // Type-safe error checking
+    const errorWithResponse = error as { response?: { status: number } };
+
     // Check if error is retryable
     const isRetryable =
       // Network errors or timeouts (no response)
-      !error.response ||
+      !errorWithResponse.response ||
       // Server errors (5xx) or rate limiting (429)
-      (error.response && (error.response.status >= 500 || error.response.status === 429));
+      (errorWithResponse.response &&
+        (errorWithResponse.response.status >= 500 ||
+          errorWithResponse.response.status === 429));
 
     // If not retryable (4xx except 429), throw immediately
     if (!isRetryable) {
@@ -82,13 +86,13 @@ export async function retryRequest(fn, retries = 3, delay = 1000) {
 
 /**
  * Check if error is a network error
- * @param {Error} error - The error object
- * @returns {boolean} True if network error
  */
-export function isNetworkError(error) {
+export function isNetworkError(error: unknown): boolean {
+  const errorMessage = error instanceof Error ? error.message : String(error);
+
   return (
-    error.message.includes("fetch") ||
-    error.message.includes("network") ||
-    error.message.includes("NetworkError")
+    errorMessage.includes("fetch") ||
+    errorMessage.includes("network") ||
+    errorMessage.includes("NetworkError")
   );
 }
