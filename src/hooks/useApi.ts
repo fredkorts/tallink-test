@@ -1,117 +1,68 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { apiRequest, handleApiError, retryRequest } from "../utils/apiHelpers";
+import { apiRequest, handleApiError } from "../utils/apiHelpers";
+
+
 
 /**
- * Options for API request
- */
-export interface ApiOptions extends RequestInit {
-  signal?: AbortSignal;
-}
-
-/**
- * Return type for useApi hook
- */
-export interface UseApiReturn<T> {
-  /** Response data from the API */
-  data: T | null;
-  /** Loading state indicator */
-  loading: boolean;
-  /** Error message if request failed */
-  error: string | null;
-  /** Execute the API request manually */
-  execute: (url?: string, options?: ApiOptions) => Promise<T | undefined>;
-  /** Reset hook state to initial values */
-  reset: () => void;
-}
-
-/**
- * Custom hook for API requests with loading and error states
- * Provides a clean interface for making API calls with automatic state management
- * Includes request cancellation and race condition prevention
- *
- * @param url - The API endpoint URL (optional, can be provided in execute)
- * @param options - Fetch options (method, headers, body, etc.)
- * @param immediate - Whether to execute the request immediately on mount
- * @returns Object with data, loading, error, execute, and reset
+ * Minimal API hook for calculator app
+ * @param url - API endpoint (optional, can be provided in execute)
+ * @param options - Fetch options (optional)
+ * @param immediate - If true, runs on mount
  */
 function useApi<T = unknown>(
   url: string | null = null,
-  options: ApiOptions = {},
+  options: RequestInit = {},
   immediate: boolean = false
-): UseApiReturn<T> {
+): {
+  data: T | null;
+  loading: boolean;
+  error: string | null;
+  execute: (url?: string, options?: RequestInit) => Promise<T | undefined>;
+  reset: () => void;
+} {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Track current request to prevent race conditions
-  const requestIdRef = useRef<number>(0);
+  // Only track the latest request for aborting
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Use ref for options to avoid dependency issues
-  const optionsRef = useRef<ApiOptions>(options);
-  useEffect(() => {
-    optionsRef.current = options;
-  });
-
-  // Execute the API request
   const execute = useCallback(
-    async (executeUrl: string = url || '', executeOptions: ApiOptions = optionsRef.current): Promise<T | undefined> => {
-      if (!executeUrl) {
+    async (executeUrl?: string, executeOptions: RequestInit = {}): Promise<T | undefined> => {
+      const finalUrl = executeUrl || url;
+      if (!finalUrl) {
         console.error("useApi: No URL provided");
         setError("No URL provided");
         return;
       }
-
-      // Cancel any existing request
+      // Abort previous request
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
-
-      // Create new AbortController for this request
       const abortController = new AbortController();
       abortControllerRef.current = abortController;
-
-      // Increment request ID to track this specific request
-      const currentRequestId = ++requestIdRef.current;
-
       setLoading(true);
       setError(null);
-
       try {
-        // Use retryRequest to handle transient failures
-        const result = await retryRequest<T>(
-          () =>
-            apiRequest<T>(executeUrl, {
-              ...executeOptions,
-              signal: abortController.signal,
-            }),
-          3, // retries
-          1000 // delay
-        );
-
-        // Only update state if this is still the latest request
-        if (currentRequestId === requestIdRef.current && !abortController.signal.aborted) {
-          setData(result);
-          setLoading(false);
-        }
-
+        const result = await apiRequest<T>(finalUrl, {
+          ...options,
+          ...executeOptions,
+          signal: abortController.signal,
+        });
+        setData(result);
+        setLoading(false);
         return result;
       } catch (err) {
-        // Don't update state if request was aborted or if a newer request exists
-        if (currentRequestId === requestIdRef.current && !abortController.signal.aborted) {
-          const errorMessage = handleApiError(err);
-          setError(errorMessage);
-          setLoading(false);
-        }
+        setError(handleApiError(err));
+        setLoading(false);
         throw err;
       }
     },
-    [url]
+    [url, options]
   );
 
   // Reset the hook state
   const reset = useCallback(() => {
-    // Cancel any pending request
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -131,22 +82,11 @@ function useApi<T = unknown>(
 
   // Execute immediately if requested
   useEffect(() => {
-    const runRequest = async () => {
-      if (immediate && url) {
-        try {
-          await execute();
-        } catch {
-          // Error is already handled in execute function
-        }
-      }
-    };
-
-    void runRequest();
-    // Note: execute is included in dependencies. Since execute is memoized with useCallback
-    // and depends on url/options, the effect will re-run when url or options change.
-    // Cleanup is handled by the separate unmount effect and within execute() itself
-    // through requestId tracking and AbortController.
-  }, [immediate, url, execute]);
+    if (immediate && url) {
+      execute();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [immediate, url]);
 
   return {
     data,

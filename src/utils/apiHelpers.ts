@@ -1,4 +1,19 @@
 /**
+ * Custom error for API responses
+ */
+export class ApiError extends Error {
+  response: { status: number; data?: unknown; message?: string };
+  constructor(
+    message: string,
+    status: number,
+    data?: unknown
+  ) {
+    super(message);
+    this.name = 'ApiError';
+    this.response = { status, data, message };
+  }
+}
+/**
  * Generic API request helper with error handling
  */
 export async function apiRequest<T = unknown>(
@@ -6,20 +21,57 @@ export async function apiRequest<T = unknown>(
   options: RequestInit = {}
 ): Promise<T> {
   try {
+    // Build headers: merge options.headers first
+    const headers = new Headers(options.headers || {});
+    const method = (options.method || 'GET').toUpperCase();
+    const hasBody = !!options.body && method !== 'GET' && method !== 'HEAD';
+    if (!headers.has('Content-Type') && hasBody) {
+      headers.set('Content-Type', 'application/json');
+    }
     const response = await fetch(url, {
-      headers: {
-        "Content-Type": "application/json",
-        ...options.headers,
-      },
       ...options,
+      headers,
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    // Handle empty response (204 No Content, Content-Length: 0, or no body)
+    if (
+      response.status === 204 ||
+      response.headers.get('content-length') === '0' ||
+      response.headers.get('transfer-encoding') === null && !('body' in response)
+    ) {
+      if (!response.ok) {
+        throw new ApiError(`HTTP error! status: ${response.status}`, response.status);
+      }
+      return undefined as T;
     }
 
-    const data = await response.json();
-    return data as T;
+    const contentType = response.headers.get('content-type') || '';
+    let parsed: unknown = undefined;
+    if (contentType.includes('application/json')) {
+      // Safe to parse as JSON
+      try {
+        parsed = await response.json();
+      } catch (err) {
+        parsed = undefined;
+      }
+    } else {
+      // Not JSON: try to get text, parse if possible
+      const text = await response.text();
+      if (!text || text.trim() === '') {
+        parsed = undefined;
+      } else {
+        try {
+          parsed = JSON.parse(text);
+        } catch {
+          parsed = text;
+        }
+      }
+    }
+
+    if (!response.ok) {
+      throw new ApiError(`HTTP error! status: ${response.status}`, response.status, parsed);
+    }
+    return parsed as T;
   } catch (error) {
     console.error("API request failed:", error);
     throw error;
@@ -62,25 +114,32 @@ export async function retryRequest<T>(
       throw error;
     }
 
-    // Type-safe error checking
-    const errorWithResponse = error as { response?: { status: number } };
-
-    // Check if error is retryable
-    const isRetryable =
-      // Network errors or timeouts (no response)
-      !errorWithResponse.response ||
-      // Server errors (5xx) or rate limiting (429)
-      (errorWithResponse.response &&
-        (errorWithResponse.response.status >= 500 ||
-          errorWithResponse.response.status === 429));
-
-    // If not retryable (4xx except 429), throw immediately
-    if (!isRetryable) {
-      throw error;
+    // Retry on network errors (no response/status)
+    if (isNetworkError(error)) {
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      return retryRequest(fn, retries - 1, delay);
     }
 
-    await new Promise((resolve) => setTimeout(resolve, delay));
-    return retryRequest(fn, retries - 1, delay);
+    // Retry on 5xx or 429, but not on 4xx (except 429)
+
+    let status: number | undefined = undefined;
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'response' in error &&
+      error.response &&
+      typeof (error.response as { status?: unknown }).status === 'number'
+    ) {
+      status = (error.response as { status: number }).status;
+    }
+
+    if (status !== undefined && (status >= 500 || status === 429)) {
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      return retryRequest(fn, retries - 1, delay);
+    }
+
+    // Otherwise, do not retry
+    throw error;
   }
 }
 

@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { renderHook, waitFor } from "@testing-library/react";
+import { renderHook, waitFor, act } from "@testing-library/react";
 import useApi from "../useApi";
-import type { ApiOptions } from "../useApi";
 import * as apiHelpers from "../../utils/apiHelpers";
 
 // Mock the apiHelpers module
@@ -114,7 +113,7 @@ describe("useApi", () => {
     vi.mocked(apiHelpers.apiRequest).mockResolvedValue(mockData);
 
     const { result } = renderHook(() => useApi<MockData>());
-    const customOptions: ApiOptions = { 
+  const customOptions: RequestInit = { 
       method: "POST", 
       body: JSON.stringify({ test: "data" }) 
     };
@@ -146,7 +145,8 @@ describe("useApi", () => {
       expect(result.current.data).toEqual(mockData);
     });
 
-    await waitFor(() => {
+
+    act(() => {
       result.current.reset();
     });
 
@@ -173,24 +173,5 @@ describe("useApi", () => {
     consoleErrorSpy.mockRestore();
   });
 
-  it("uses retryRequest for failed requests", async () => {
-    const mockData: MockData = { id: 1, name: "Test" };
-    // Mock retryRequest to call the function it receives
-    vi.mocked(apiHelpers.retryRequest).mockImplementation(<T,>(fn: () => Promise<T>) => fn());
-    // Mock apiRequest to return the data
-    vi.mocked(apiHelpers.apiRequest).mockResolvedValue(mockData);
-
-    const { result } = renderHook(() => useApi<MockData>());
-
-    await result.current.execute("/api/test");
-
-    await waitFor(() => {
-      expect(apiHelpers.retryRequest).toHaveBeenCalledWith(
-        expect.any(Function),
-        expect.any(Number),
-        expect.any(Number)
-      );
-      expect(result.current.data).toEqual(mockData);
-    });
-  });
 });
+

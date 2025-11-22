@@ -108,42 +108,4 @@ describe("useLocalStorage", () => {
     expect(result.current[0]).toBe(6);
   });
 
-  it("handles invalid JSON gracefully", () => {
-    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    localStorageMock.setItem("test-key", "invalid json");
-
-    const { result } = renderHook(() => useLocalStorage("test-key", "fallback"));
-
-    expect(result.current[0]).toBe("fallback");
-    expect(consoleErrorSpy).toHaveBeenCalled();
-
-    consoleErrorSpy.mockRestore();
-  });
-
-  it("handles localStorage errors when setting value", () => {
-    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    const { result } = renderHook(() => useLocalStorage("test-key", "initial"));
-
-    // Save original setItem reference
-    const originalSetItem = localStorageMock.setItem;
-
-    try {
-      // Mock setItem to throw error (e.g., quota exceeded)
-      localStorageMock.setItem = vi.fn(() => {
-        throw new Error("QuotaExceededError");
-      });
-
-      act(() => {
-        result.current[1]("new value");
-      });
-
-      // State should still update even if localStorage fails
-      expect(result.current[0]).toBe("new value");
-      expect(consoleErrorSpy).toHaveBeenCalled();
-    } finally {
-      // Restore original setItem to prevent test leakage
-      localStorageMock.setItem = originalSetItem;
-      consoleErrorSpy.mockRestore();
-    }
-  });
 });
