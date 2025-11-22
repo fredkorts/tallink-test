@@ -4,7 +4,10 @@ import App from "./App.jsx";
 import "./index.css";
 import { makeServer } from "./mirage";
 
-makeServer();
+// Only run Mirage in development
+if (import.meta.env.DEV) {
+  makeServer();
+}
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
