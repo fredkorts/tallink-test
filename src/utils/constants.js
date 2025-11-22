@@ -45,6 +45,12 @@ export const CALCULATOR_MODES = {
   CURRENCY: "currency",
 };
 
+// Mode display labels
+export const MODE_LABELS = {
+  [CALCULATOR_MODES.MATH]: "Math",
+  [CALCULATOR_MODES.CURRENCY]: "Currency",
+};
+
 // Initial display value
 export const INITIAL_DISPLAY = "0";
 
