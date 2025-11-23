@@ -3,9 +3,12 @@
  * - Handles Infinity, NaN, decimals, negatives
  */
 
-export function formatResult(value: number): string {
-  if (Number.isNaN(value)) return "NaN";
-  if (!Number.isFinite(value)) return value > 0 ? "∞" : "-∞";
+import { SPECIAL_VALUES } from "../../../utils/constants";
+
+export function formatResult(value: number | null): string {
+  if (value === null) return SPECIAL_VALUES.NAN;
+  if (Number.isNaN(value)) return SPECIAL_VALUES.NAN;
+  if (!Number.isFinite(value)) return value > 0 ? SPECIAL_VALUES.INFINITY : SPECIAL_VALUES.NEGATIVE_INFINITY;
   return value.toString();
 }
 

@@ -1,20 +1,16 @@
+import { useEffect } from "react";
 import Display from "./Display.tsx";
 import Keypad from "./Keypad.tsx";
-import { useCalculator } from '../hooks/useCalculator';
 import HistoryPanel from "./HistoryPanel.jsx";
-import useHistory from '../hooks/useHistory';
+import { useCalculator } from "../hooks/useCalculator";
+import useHistory from "../hooks/useHistory";
+import { OPERATIONS } from "../../../utils/constants";
 
-/**
- * Main container for Math Calculator mode
- * Renders the display, keypad, and (optionally) history panel
- */
 export default function MathCalculator() {
   const {
-    currentInput,
-    operator,
-    firstOperand,
+    expression,
     result,
-    history: calcHistory,
+    lastEntry,
     isError,
     handleNumberInput,
     handleDecimalInput,
@@ -23,36 +19,56 @@ export default function MathCalculator() {
     handleClear,
     handleBackspace,
   } = useCalculator();
+
   const { history, addHistoryEntry } = useHistory();
 
-  // Wrap equals to also add to history
-  const handleEqualsWithHistory = () => {
-    handleEquals();
-    // Add the latest entry from calcHistory to persistent history
-    setTimeout(() => {
-      if (calcHistory.length > 0) {
-        const lastEntry = calcHistory[calcHistory.length - 1];
-        addHistoryEntry(lastEntry);
+  useEffect(() => {
+    if (lastEntry) {
+      addHistoryEntry(lastEntry);
+    }
+  }, [addHistoryEntry, lastEntry, result]);
+
+  useEffect(() => {
+    const handleKey = (event: KeyboardEvent) => {
+      const { key } = event;
+      if (/[0-9]/.test(key)) {
+        handleNumberInput(key);
+      } else if (key === ".") {
+        handleDecimalInput();
+      } else if (["+", "-", "*", "/", "p", "P"].includes(key)) {
+        event.preventDefault();
+        const operatorMap: Record<string, string> = {
+          "+": OPERATIONS.ADD,
+          "-": OPERATIONS.SUBTRACT,
+          "*": OPERATIONS.MULTIPLY,
+          "/": OPERATIONS.DIVIDE,
+          p: OPERATIONS.PRIME,
+          P: OPERATIONS.PRIME,
+        };
+        handleOperatorInput(operatorMap[key]);
+      } else if (key === "Enter" || key === "=") {
+        event.preventDefault();
+        handleEquals();
+      } else if (key === "Backspace") {
+        handleBackspace();
+      } else if (key.toLowerCase() === "c" || key === "Escape") {
+        handleClear();
       }
-    }, 0);
-  };
+    };
+
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [handleBackspace, handleClear, handleDecimalInput, handleEquals, handleNumberInput, handleOperatorInput]);
 
   return (
     <div className="math-calculator">
-      <Display
-        currentInput={currentInput}
-        operator={operator}
-        firstOperand={firstOperand}
-        result={result}
-        history={calcHistory}
-        isError={isError}
-      />
-  <HistoryPanel history={history} onSelect={undefined} />
+      <Display expression={expression} result={result} history={history} isError={isError} />
+      <HistoryPanel history={history} />
       <Keypad
         onNumber={handleNumberInput}
         onDecimal={handleDecimalInput}
         onOperator={handleOperatorInput}
-        onEquals={handleEqualsWithHistory}
+        onEquals={handleEquals}
         onClear={handleClear}
         onBackspace={handleBackspace}
       />
