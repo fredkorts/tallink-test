@@ -1,9 +1,23 @@
+
 import { apiRequest, handleApiError } from '../utils/apiHelpers';
 import type {
   HistoryData,
   HistoryRecord,
   HistoryApiResponse,
 } from './types';
+
+/**
+ * Delete all calculation history records
+ */
+export async function deleteHistory(): Promise<void> {
+  try {
+    await apiRequest<void>('/api/history', {
+      method: 'DELETE',
+    });
+  } catch (error) {
+    throw new Error(handleApiError(error));
+  }
+}
 
 /**
  * Post a new calculation to the history

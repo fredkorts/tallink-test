@@ -48,6 +48,12 @@ export function makeServer({ environment = "development" } = {}) {
         }
       });
 
+      // Delete all calculation history records
+      this.delete("/history", (schema) => {
+        schema.records.all().models.forEach((rec) => rec.destroy());
+        return new Response(204);
+      });
+
       // Get currency exchange rates
       // Returns rates with timestamp for tracking "last updated" time
       this.get(

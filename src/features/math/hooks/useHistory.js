@@ -1,6 +1,6 @@
 /* global localStorage */
 import { useState, useEffect } from "react";
-import { postHistory, getHistory } from "../../../services/historyService";
+import { postHistory, getHistory, deleteHistory } from "../../../services/historyService";
 
 // Utility to format a history entry
 function formatHistoryEntry({ operand1, operator, operand2, result }) {
@@ -85,10 +85,15 @@ export default function useHistory() {
   }
 
   // Clear all history
-  function clearHistory() {
+  async function clearHistory() {
     setHistory([]);
     if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
       localStorage.removeItem("calc_history");
+    }
+    try {
+      await deleteHistory();
+    } catch {
+      // Ignore API errors, local state already cleared
     }
   }
 
