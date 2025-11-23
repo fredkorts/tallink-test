@@ -1,5 +1,5 @@
 /* global localStorage */
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { postHistory, getHistory, deleteHistory } from "../../../services/historyService";
 
 // Utility to format a history entry
@@ -73,7 +73,7 @@ export default function useHistory() {
   }, [history]);
 
   // Add a new entry (and POST to API)
-  async function addHistoryEntry(entryObj) {
+  const addHistoryEntry = useCallback(async (entryObj) => {
     const entry = typeof entryObj === "string" ? entryObj : formatHistoryEntry(entryObj);
     setHistory((prev) => [...prev, entry]);
     try {
@@ -82,10 +82,10 @@ export default function useHistory() {
     } catch {
       // Ignore API errors, rely on localStorage
     }
-  }
+  }, []);
 
   // Clear all history
-  async function clearHistory() {
+  const clearHistory = useCallback(async () => {
     setHistory([]);
     if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
       localStorage.removeItem("calc_history");
@@ -95,7 +95,7 @@ export default function useHistory() {
     } catch {
       // Ignore API errors, local state already cleared
     }
-  }
+  }, []);
 
   return { history, addHistoryEntry, clearHistory };
 }
