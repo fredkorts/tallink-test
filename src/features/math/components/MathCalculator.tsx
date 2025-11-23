@@ -1,5 +1,6 @@
 import Display from "./Display.tsx";
 import Keypad from "./Keypad.tsx";
+import { useCalculator } from '../hooks/useCalculator';
 // import HistoryPanel from "./HistoryPanel"; // (optional/future)
 
 /**
@@ -7,13 +8,40 @@ import Keypad from "./Keypad.tsx";
  * Renders the display, keypad, and (optionally) history panel
  */
 export default function MathCalculator() {
-  // Placeholder state for display and keypad integration
-  // TODO: Integrate with useCalculator hook
+  const {
+    currentInput,
+    operator,
+    firstOperand,
+    result,
+    history,
+    isError,
+    handleNumberInput,
+    handleDecimalInput,
+    handleOperatorInput,
+    handleEquals,
+    handleClear,
+    handleBackspace,
+  } = useCalculator();
+
   return (
     <div className="math-calculator">
-      <Display />
+      <Display
+        currentInput={currentInput}
+        operator={operator}
+        firstOperand={firstOperand}
+        result={result}
+        history={history}
+        isError={isError}
+      />
       {/* <HistoryPanel /> */}
-      <Keypad />
+      <Keypad
+        onNumber={handleNumberInput}
+        onDecimal={handleDecimalInput}
+        onOperator={handleOperatorInput}
+        onEquals={handleEquals}
+        onClear={handleClear}
+        onBackspace={handleBackspace}
+      />
     </div>
   );
 }
