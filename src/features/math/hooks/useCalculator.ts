@@ -13,16 +13,16 @@
 import { useState } from 'react';
 import { add, subtract, multiply, divide } from '../utils/operations';
 import { isValidDigitInput, canAddDecimal } from '../utils/inputValidator';
-
 export type Operator = '+' | '-' | '×' | '÷' | 'P' | null;
 
 export interface CalculatorState {
   currentInput: string;
   operator: Operator;
   firstOperand: string | null;
-  result: number | null | 'Error';
+  result: number | null | "Error" | "NaN" | "Infinity";
   history: string[];
   isError?: boolean;
+  errorType?: "NaN" | "Infinity" | null;
 }
 
 export function useCalculator() {
@@ -63,14 +63,16 @@ export function useCalculator() {
             result: null,
           };
         } else {
-          // Error: reset to initial state, set error marker, clear operator, set isError
+          // Error: reset to initial state, set error marker, clear operator, set isError and errorType
+          let errorType: 'NaN' | 'Infinity' = Number.isNaN(computed) ? 'NaN' : 'Infinity';
           return {
             ...prev,
             firstOperand: '0',
-            currentInput: '0',
+            currentInput: errorType,
             operator: null,
-            result: 'Error',
+            result: errorType,
             isError: true,
+            errorType,
           };
         }
       }
@@ -89,16 +91,19 @@ export function useCalculator() {
       if (!prev.operator || prev.firstOperand === null) return prev;
       const computed = computeResult(prev.firstOperand, prev.currentInput, prev.operator);
       let isError = !Number.isFinite(computed) || Number.isNaN(computed);
-      const historyEntry = `${prev.firstOperand}${prev.operator}${prev.currentInput}=${isError ? 'Error' : computed}`;
+      let errorType: 'NaN' | 'Infinity' | null = null;
+      if (isError) errorType = Number.isNaN(computed) ? 'NaN' : 'Infinity';
+      const historyEntry = `${prev.firstOperand}${prev.operator}${prev.currentInput}=${isError ? errorType : computed}`;
       if (isError) {
         return {
           ...prev,
-          result: 'Error',
-          currentInput: 'Error',
+          result: errorType,
+          currentInput: errorType ?? 'Error',
           firstOperand: null,
           operator: null,
           history: [...prev.history, historyEntry],
           isError: true,
+          errorType,
         };
       }
       return {
@@ -120,6 +125,7 @@ export function useCalculator() {
       result: null,
       history: [],
       isError: false,
+      errorType: null,
     });
   }
 

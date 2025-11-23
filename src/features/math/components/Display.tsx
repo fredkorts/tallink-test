@@ -8,12 +8,13 @@ interface DisplayProps {
   currentInput: string;
   operator: string | null;
   firstOperand: string | null;
-  result: number | null | 'Error';
+  result: number | null | 'Error' | 'NaN' | 'Infinity';
   history: string[];
   isError?: boolean;
+  errorType?: 'NaN' | 'Infinity' | null;
 }
 
-export default function Display({ currentInput, operator, firstOperand, result, history, isError }: DisplayProps) {
+export default function Display({ currentInput, operator, firstOperand, result, history, isError, errorType }: DisplayProps) {
   return (
     <div className="calculator-display">
       <div className="display-history">
@@ -23,7 +24,7 @@ export default function Display({ currentInput, operator, firstOperand, result, 
       </div>
       <div className="display-result">
         {isError ? (
-          <span className="display-error">Error</span>
+          <span className="display-error">{errorType === 'NaN' ? 'NaN' : errorType === 'Infinity' ? '∞' : 'Error'}</span>
         ) : result !== null ? result : (operator && firstOperand !== null ? `${firstOperand}${operator}${currentInput}` : currentInput)}
       </div>
     </div>

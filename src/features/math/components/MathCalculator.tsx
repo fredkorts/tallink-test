@@ -1,7 +1,8 @@
 import Display from "./Display.tsx";
 import Keypad from "./Keypad.tsx";
 import { useCalculator } from '../hooks/useCalculator';
-// import HistoryPanel from "./HistoryPanel"; // (optional/future)
+import HistoryPanel from "./HistoryPanel.jsx";
+import useHistory from '../hooks/useHistory';
 
 /**
  * Main container for Math Calculator mode
@@ -13,7 +14,7 @@ export default function MathCalculator() {
     operator,
     firstOperand,
     result,
-    history,
+    history: calcHistory,
     isError,
     handleNumberInput,
     handleDecimalInput,
@@ -22,6 +23,19 @@ export default function MathCalculator() {
     handleClear,
     handleBackspace,
   } = useCalculator();
+  const { history, addHistoryEntry } = useHistory();
+
+  // Wrap equals to also add to history
+  const handleEqualsWithHistory = () => {
+    handleEquals();
+    // Add the latest entry from calcHistory to persistent history
+    setTimeout(() => {
+      if (calcHistory.length > 0) {
+        const lastEntry = calcHistory[calcHistory.length - 1];
+        addHistoryEntry(lastEntry);
+      }
+    }, 0);
+  };
 
   return (
     <div className="math-calculator">
@@ -30,15 +44,15 @@ export default function MathCalculator() {
         operator={operator}
         firstOperand={firstOperand}
         result={result}
-        history={history}
+        history={calcHistory}
         isError={isError}
       />
-      {/* <HistoryPanel /> */}
+  <HistoryPanel history={history} onSelect={undefined} />
       <Keypad
         onNumber={handleNumberInput}
         onDecimal={handleDecimalInput}
         onOperator={handleOperatorInput}
-        onEquals={handleEquals}
+        onEquals={handleEqualsWithHistory}
         onClear={handleClear}
         onBackspace={handleBackspace}
       />
