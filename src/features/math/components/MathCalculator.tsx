@@ -63,7 +63,7 @@ export default function MathCalculator() {
   return (
     <div className="math-calculator">
       <Display expression={expression} result={result} history={history} isError={isError} />
-      <HistoryPanel history={history} />
+      {/* <HistoryPanel history={history} /> */}
       <Keypad
         onNumber={handleNumberInput}
         onDecimal={handleDecimalInput}
