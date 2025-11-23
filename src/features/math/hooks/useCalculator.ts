@@ -78,10 +78,12 @@ export function useCalculator() {
 
   const expression = useMemo(() => {
     if (state.operator && state.firstOperand !== null) {
-      return `${state.firstOperand}${state.operator}${state.currentInput}`;
+      return state.shouldResetInput
+        ? state.firstOperand
+        : `${state.firstOperand}${state.operator}${state.currentInput}`;
     }
     return state.currentInput;
-  }, [state.currentInput, state.firstOperand, state.operator]);
+  }, [state.currentInput, state.firstOperand, state.operator, state.shouldResetInput]);
 
   const appendDigit = (digit: string) => {
     setState((prev) => {
