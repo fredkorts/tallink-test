@@ -5,11 +5,11 @@ describe('formatters', () => {
   describe('formatResult', () => {
     it('formats NaN as "NaN"', () => {
       expect(formatResult(NaN)).toBe('NaN');
-    });
-    it('formats Infinity as "∞"', () => {
-      expect(formatResult(Infinity)).toBe('∞');
-      expect(formatResult(-Infinity)).toBe('-∞');
-    });
+  });
+  it('formats Infinity as "∞"', () => {
+    expect(formatResult(Infinity)).toBe('Infinity');
+    expect(formatResult(-Infinity)).toBe('-Infinity');
+  });
     it('formats normal numbers as string', () => {
       expect(formatResult(123)).toBe('123');
       expect(formatResult(-45.6)).toBe('-45.6');

@@ -1,182 +1,197 @@
-/**
- * useCalculator - State and logic for the calculator
- *
- * Handles:
- * - currentInput, operator, firstOperand, result
- * - handleNumberInput(digit)
- * - handleOperatorInput(op)
- * - handleEquals()
- * - handleClear()
- * - decimal point input (only one per number)
- * - 10-digit limit
- */
-import { useState } from 'react';
-import { add, subtract, multiply, divide } from '../utils/operations';
-import { isValidDigitInput, canAddDecimal } from '../utils/inputValidator';
-export type Operator = '+' | '-' | '×' | '÷' | 'P' | null;
+import { useMemo, useState } from "react";
+import {
+  DECIMAL_POINT,
+  INITIAL_DISPLAY,
+  MAX_DIGITS,
+  OPERATIONS,
+  SPECIAL_VALUES,
+} from "../../../utils/constants";
+import { divide, multiply, subtract, add } from "../utils/operations";
+import { formatResult, formatInput } from "../utils/formatters";
+import { canAddDecimal, isValidDigitInput } from "../utils/inputValidator";
+import { maxPrimeInRange } from "../utils/primeUtils";
 
-export interface CalculatorState {
+export type Operator = typeof OPERATIONS[keyof typeof OPERATIONS] | null;
+
+interface CalculatorState {
   currentInput: string;
-  operator: Operator;
   firstOperand: string | null;
-  result: number | null | "Error" | "NaN" | "Infinity";
-  history: string[];
-  isError?: boolean;
-  errorType?: "NaN" | "Infinity" | null;
+  operator: Operator;
+  result: string | null;
+  lastEntry: string | null;
+  isError: boolean;
+  shouldResetInput: boolean;
+}
+
+const initialState: CalculatorState = {
+  currentInput: INITIAL_DISPLAY,
+  firstOperand: null,
+  operator: null,
+  result: null,
+  lastEntry: null,
+  isError: false,
+  shouldResetInput: false,
+};
+
+function computeOperation(a: string, b: string, operator: Operator) {
+  const left = parseFloat(a);
+  const right = parseFloat(b);
+
+  if (Number.isNaN(left) || Number.isNaN(right) || operator === null) {
+    return { value: NaN, display: SPECIAL_VALUES.NAN, isError: true };
+  }
+
+  let result: number | null = null;
+  switch (operator) {
+    case OPERATIONS.ADD:
+      result = add(left, right);
+      break;
+    case OPERATIONS.SUBTRACT:
+      result = subtract(left, right);
+      break;
+    case OPERATIONS.MULTIPLY:
+      result = multiply(left, right);
+      break;
+    case OPERATIONS.DIVIDE:
+      result = divide(left, right);
+      break;
+    case OPERATIONS.PRIME: {
+      const prime = maxPrimeInRange(left, right);
+      result = prime ?? NaN;
+      break;
+    }
+    default:
+      result = NaN;
+  }
+
+  const display = formatResult(result);
+  const isError =
+    display === SPECIAL_VALUES.NAN ||
+    display === SPECIAL_VALUES.INFINITY ||
+    display === SPECIAL_VALUES.NEGATIVE_INFINITY;
+
+  return { value: result, display, isError };
 }
 
 export function useCalculator() {
-  const [state, setState] = useState<CalculatorState>({
-    currentInput: '0',
-    operator: null,
-    firstOperand: null,
-    result: null,
-    history: [],
-  });
+  const [state, setState] = useState<CalculatorState>(initialState);
 
-  function handleNumberInput(digit: string) {
-    setState((prev) => {
-      let input = prev.currentInput === '0' ? digit : prev.currentInput + digit;
-      if (!isValidDigitInput(input)) return prev;
-      return { ...prev, currentInput: input };
-    });
-  }
+  const expression = useMemo(() => {
+    if (state.operator && state.firstOperand !== null) {
+      return `${state.firstOperand}${state.operator}${state.currentInput}`;
+    }
+    return state.currentInput;
+  }, [state.currentInput, state.firstOperand, state.operator]);
 
-  function handleDecimalInput() {
+  const appendDigit = (digit: string) => {
     setState((prev) => {
-      if (!canAddDecimal(prev.currentInput)) return prev;
-      return { ...prev, currentInput: prev.currentInput + '.' };
-    });
-  }
+      const sanitizedDigit = digit.trim();
+      if (!sanitizedDigit) return prev;
 
-  function handleOperatorInput(op: Operator) {
-    setState((prev) => {
-      if (prev.operator && prev.firstOperand !== null) {
-        // Chain operations: compute previous first
-        const computed = computeResult(prev.firstOperand, prev.currentInput, prev.operator);
-        if (Number.isFinite(computed) && !Number.isNaN(computed)) {
-          return {
-            ...prev,
-            firstOperand: String(computed),
-            currentInput: '0',
-            operator: op,
-            result: null,
-          };
-        } else {
-          // Error: reset to initial state, set error marker, clear operator, set isError and errorType
-          let errorType: 'NaN' | 'Infinity' = Number.isNaN(computed) ? 'NaN' : 'Infinity';
-          return {
-            ...prev,
-            firstOperand: '0',
-            currentInput: errorType,
-            operator: null,
-            result: errorType,
-            isError: true,
-            errorType,
-          };
-        }
-      }
+      const nextInput = prev.shouldResetInput || prev.currentInput === INITIAL_DISPLAY
+        ? sanitizedDigit
+        : prev.currentInput + sanitizedDigit;
+      if (!isValidDigitInput(nextInput, MAX_DIGITS)) return prev;
+
       return {
         ...prev,
-        firstOperand: prev.currentInput,
-        currentInput: '0',
-        operator: op,
+        currentInput: formatInput(nextInput),
+        shouldResetInput: false,
+        isError: false,
         result: null,
       };
     });
-  }
+  };
 
-  function handleEquals() {
+  const appendDecimal = () => {
     setState((prev) => {
-      if (!prev.operator || prev.firstOperand === null) return prev;
-      const computed = computeResult(prev.firstOperand, prev.currentInput, prev.operator);
-      let isError = !Number.isFinite(computed) || Number.isNaN(computed);
-      let errorType: 'NaN' | 'Infinity' | null = null;
-      if (isError) errorType = Number.isNaN(computed) ? 'NaN' : 'Infinity';
-      const historyEntry = `${prev.firstOperand}${prev.operator}${prev.currentInput}=${isError ? errorType : computed}`;
-      if (isError) {
-        return {
-          ...prev,
-          result: errorType,
-          currentInput: errorType ?? 'Error',
-          firstOperand: null,
-          operator: null,
-          history: [...prev.history, historyEntry],
-          isError: true,
-          errorType,
-        };
-      }
+      const base = prev.shouldResetInput ? INITIAL_DISPLAY : prev.currentInput;
+      if (!canAddDecimal(base)) return prev;
+      const nextInput = `${base}${DECIMAL_POINT}`;
       return {
         ...prev,
-        result: computed,
-        currentInput: String(computed),
-        firstOperand: null,
-        operator: null,
-        history: [...prev.history, historyEntry],
+        currentInput: nextInput,
+        shouldResetInput: false,
+        result: null,
       };
     });
-  }
+  };
 
-  function handleClear() {
-    setState({
-      currentInput: '0',
-      operator: null,
-      firstOperand: null,
-      result: null,
-      history: [],
-      isError: false,
-      errorType: null,
-    });
-  }
-
-  function handleBackspace() {
+  const chooseOperator = (operator: Operator) => {
     setState((prev) => {
-      if (prev.currentInput.length <= 1) {
-        return { ...prev, currentInput: '0' };
-      }
-      return { ...prev, currentInput: prev.currentInput.slice(0, -1) };
-    });
-  }
+      const incomingOperator = operator;
+      if (!incomingOperator) return prev;
 
-  function computeResult(a: string, b: string, op: Operator): number {
-    const x = parseFloat(a);
-    const y = parseFloat(b);
-    if (!Number.isFinite(x) || Number.isNaN(x) || !Number.isFinite(y) || Number.isNaN(y)) {
-      return NaN;
-    }
-    let result: number;
-    switch (op) {
-      case '+':
-        result = add(x, y);
-        break;
-      case '-':
-        result = subtract(x, y);
-        break;
-      case '×':
-        result = multiply(x, y);
-        break;
-      case '÷':
-        if (y === 0) return NaN; // Explicitly handle division by zero
-        result = divide(x, y);
-        break;
-      default:
-        return NaN;
-    }
-    // Enforce 10-digit integer part limit
-    const [intPart = ''] = Math.abs(result).toString().split('.');
-    if (!Number.isFinite(result) || Number.isNaN(result) || intPart.length > 10) {
-      return NaN;
-    }
-    return result;
-  }
+      // If operator exists and user hits another operator before typing second operand, just swap
+      if (prev.operator && prev.shouldResetInput) {
+        return { ...prev, operator: incomingOperator };
+      }
+
+      if (prev.operator && prev.firstOperand !== null && !prev.shouldResetInput) {
+        const { display, isError } = computeOperation(prev.firstOperand, prev.currentInput, prev.operator);
+        const entry = `${prev.firstOperand}${prev.operator}${prev.currentInput}=${display}`;
+        return {
+          currentInput: display,
+          firstOperand: display,
+          operator: incomingOperator,
+          result: display,
+          lastEntry: entry,
+          isError,
+          shouldResetInput: true,
+        };
+      }
+
+      return {
+        ...prev,
+        firstOperand: prev.currentInput,
+        operator: incomingOperator,
+        shouldResetInput: true,
+      };
+    });
+  };
+
+  const calculateResult = () => {
+    setState((prev) => {
+      if (!prev.operator || prev.firstOperand === null) return prev;
+      const { display, isError } = computeOperation(prev.firstOperand, prev.currentInput, prev.operator);
+      const entry = `${prev.firstOperand}${prev.operator}${prev.currentInput}=${display}`;
+      return {
+        currentInput: display,
+        firstOperand: null,
+        operator: null,
+        result: display,
+        lastEntry: entry,
+        isError,
+        shouldResetInput: true,
+      };
+    });
+  };
+
+  const clearAll = () => {
+    setState(initialState);
+  };
+
+  const backspace = () => {
+    setState((prev) => {
+      if (prev.shouldResetInput) {
+        return { ...prev, currentInput: INITIAL_DISPLAY, shouldResetInput: false };
+      }
+      if (prev.currentInput.length <= 1) {
+        return { ...prev, currentInput: INITIAL_DISPLAY };
+      }
+      const next = prev.currentInput.slice(0, -1);
+      return { ...prev, currentInput: next || INITIAL_DISPLAY };
+    });
+  };
 
   return {
     ...state,
-    handleNumberInput,
-    handleDecimalInput,
-    handleOperatorInput,
-    handleEquals,
-    handleClear,
-    handleBackspace,
+    expression,
+    handleNumberInput: appendDigit,
+    handleDecimalInput: appendDecimal,
+    handleOperatorInput: chooseOperator,
+    handleEquals: calculateResult,
+    handleClear: clearAll,
+    handleBackspace: backspace,
   };
 }

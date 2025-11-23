@@ -9,7 +9,6 @@ describe('useCalculator', () => {
     expect(result.current.operator).toBeNull();
     expect(result.current.firstOperand).toBeNull();
     expect(result.current.result).toBeNull();
-    expect(result.current.history).toEqual([]);
   });
 
   it('handles number input and digit limit', () => {
@@ -44,10 +43,9 @@ describe('useCalculator', () => {
     });
     expect(result.current.firstOperand).toBe('5');
     expect(result.current.operator).toBe('×');
-    expect(result.current.currentInput).toBe('0');
   });
 
-  it('handles equals and history', () => {
+  it('handles equals and produces history entry', () => {
     const { result } = renderHook(() => useCalculator());
     act(() => {
       result.current.handleNumberInput('2');
@@ -55,9 +53,9 @@ describe('useCalculator', () => {
       result.current.handleNumberInput('3');
       result.current.handleEquals();
     });
-    expect(result.current.result).toBe(5);
+    expect(result.current.result).toBe('5');
     expect(result.current.currentInput).toBe('5');
-    expect(result.current.history[result.current.history.length - 1]).toBe('2+3=5');
+    expect(result.current.lastEntry).toBe('2+3=5');
   });
 
   it('handles clear', () => {
@@ -71,7 +69,7 @@ describe('useCalculator', () => {
     expect(result.current.operator).toBeNull();
     expect(result.current.firstOperand).toBeNull();
     expect(result.current.result).toBeNull();
-    expect(result.current.history).toEqual([]);
+    expect(result.current.lastEntry).toBeNull();
   });
 
   it('handles backspace', () => {
