@@ -13,7 +13,7 @@ export default function RateUpdateInfo({ elapsed, onRefresh, loading }: RateUpda
       <div className="rate-update__label">{elapsed ? `Updated ${elapsed}` : "Fetching rates..."}</div>
       <IconButton
         icon="⟳"
-        label="Refresh rates"
+        ariaLabel="Refresh rates"
         onClick={onRefresh}
         disabled={loading}
       />

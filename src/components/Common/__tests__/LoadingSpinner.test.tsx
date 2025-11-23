@@ -11,13 +11,17 @@ describe("LoadingSpinner", () => {
 
   it("renders with small size", () => {
     const { container } = render(<LoadingSpinner size="small" />);
-    const spinnerContainer = container.firstChild;
+    const spinnerContainer = container.firstElementChild as HTMLElement | null;
+    if (!spinnerContainer) throw new Error("Expected spinner element");
+
     expect(spinnerContainer.className).toMatch(/spinnerContainer--small/);
   });
 
   it("renders with large size", () => {
     const { container } = render(<LoadingSpinner size="large" />);
-    const spinnerContainer = container.firstChild;
+    const spinnerContainer = container.firstElementChild as HTMLElement | null;
+    if (!spinnerContainer) throw new Error("Expected spinner element");
+
     expect(spinnerContainer.className).toMatch(/spinnerContainer--large/);
   });
 

@@ -1,5 +1,4 @@
-import React from "react";
-import PropTypes from "prop-types";
+import type { ButtonHTMLAttributes, MouseEventHandler, ReactNode } from "react";
 import styles from "./Common.module.css";
 
 /**
@@ -9,6 +8,21 @@ import styles from "./Common.module.css";
  * IMPORTANT: When iconOnly is true, ariaLabel is REQUIRED for accessibility.
  * Icon-only buttons must have a descriptive label for screen readers.
  */
+type IconButtonVariant = "default" | "primary" | "secondary";
+type ButtonType = ButtonHTMLAttributes<HTMLButtonElement>["type"];
+
+interface IconButtonProps {
+  children?: ReactNode;
+  icon: ReactNode;
+  onClick?: MouseEventHandler<HTMLButtonElement>;
+  variant?: IconButtonVariant;
+  iconOnly?: boolean;
+  disabled?: boolean;
+  type?: ButtonType;
+  ariaLabel?: string;
+  className?: string;
+}
+
 function IconButton({
   children,
   icon,
@@ -19,7 +33,7 @@ function IconButton({
   type = "button",
   ariaLabel,
   className = "",
-}) {
+}: IconButtonProps) {
   // Runtime validation for accessibility
   if (iconOnly && !ariaLabel) {
     console.error(
@@ -28,7 +42,7 @@ function IconButton({
     );
   }
 
-  const buttonClass = `${styles.iconButton} ${
+  const buttonClass = `${styles["iconButton"]} ${
     variant !== "default" ? styles[`iconButton--${variant}`] : ""
   } ${iconOnly ? styles["iconButton--icon-only"] : ""} ${className}`.trim();
 
@@ -40,34 +54,10 @@ function IconButton({
       className={buttonClass}
       aria-label={ariaLabel}
     >
-      {icon && <span className={styles.iconButton__icon}>{icon}</span>}
+      {icon && <span className={styles["iconButton__icon"]}>{icon}</span>}
       {!iconOnly && children}
     </button>
   );
 }
-
-IconButton.propTypes = {
-  children: PropTypes.node,
-  icon: PropTypes.node.isRequired,
-  onClick: PropTypes.func,
-  variant: PropTypes.oneOf(["default", "primary", "secondary"]),
-  iconOnly: PropTypes.bool,
-  disabled: PropTypes.bool,
-  type: PropTypes.oneOf(["button", "submit", "reset"]),
-  ariaLabel: function (props, propName, componentName) {
-    if (props.iconOnly && !props[propName]) {
-      return new Error(
-        `The prop \`${propName}\` is required when \`iconOnly\` is true in \`${componentName}\`. ` +
-          "Icon-only buttons must have a descriptive label for screen readers.",
-      );
-    }
-    if (props[propName] && typeof props[propName] !== "string") {
-      return new Error(
-        `Invalid prop \`${propName}\` of type \`${typeof props[propName]}\` supplied to \`${componentName}\`, expected \`string\`.`,
-      );
-    }
-  },
-  className: PropTypes.string,
-};
 
 export default IconButton;
