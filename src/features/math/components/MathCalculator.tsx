@@ -1,8 +1,7 @@
 import { useEffect } from "react";
 import Display from "./Display.tsx";
 import Keypad from "./Keypad.tsx";
-import HistoryPanel from "./HistoryPanel.jsx";
-import { useCalculator } from "../hooks/useCalculator";
+import { useCalculator, type Operator } from "../hooks/useCalculator";
 import useHistory from "../hooks/useHistory";
 import { OPERATIONS } from "../../../utils/constants";
 
@@ -37,7 +36,7 @@ export default function MathCalculator() {
         handleDecimalInput();
       } else if (["+", "-", "*", "/", "p", "P"].includes(key)) {
         event.preventDefault();
-        const operatorMap: Record<string, string> = {
+        const operatorMap: Record<string, NonNullable<Operator>> = {
           "+": OPERATIONS.ADD,
           "-": OPERATIONS.SUBTRACT,
           "*": OPERATIONS.MULTIPLY,
@@ -45,7 +44,12 @@ export default function MathCalculator() {
           p: OPERATIONS.PRIME,
           P: OPERATIONS.PRIME,
         };
-        handleOperatorInput(operatorMap[key]);
+        const operatorKey = key as keyof typeof operatorMap;
+        const operator = operatorMap[operatorKey];
+
+        if (!operator) return;
+
+        handleOperatorInput(operator);
       } else if (key === "Enter" || key === "=") {
         event.preventDefault();
         handleEquals();

@@ -27,19 +27,25 @@ describe("ErrorMessage", () => {
 
   it("applies error type class by default", () => {
     const { container } = render(<ErrorMessage message="Error" />);
-    const errorDiv = container.firstChild;
+    const errorDiv = container.firstElementChild as HTMLElement | null;
+    if (!errorDiv) throw new Error("Expected error message element");
+
     expect(errorDiv.className).toMatch(/errorMessage/);
   });
 
   it("applies warning type class", () => {
     const { container } = render(<ErrorMessage message="Warning" type="warning" />);
-    const errorDiv = container.firstChild;
+    const errorDiv = container.firstElementChild as HTMLElement | null;
+    if (!errorDiv) throw new Error("Expected error message element");
+
     expect(errorDiv.className).toMatch(/errorMessage--warning/);
   });
 
   it("applies info type class", () => {
     const { container } = render(<ErrorMessage message="Info" type="info" />);
-    const errorDiv = container.firstChild;
+    const errorDiv = container.firstElementChild as HTMLElement | null;
+    if (!errorDiv) throw new Error("Expected error message element");
+
     expect(errorDiv.className).toMatch(/errorMessage--info/);
   });
 

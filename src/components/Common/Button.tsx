@@ -1,5 +1,4 @@
-import React from "react";
-import PropTypes from "prop-types";
+import type { ButtonHTMLAttributes, MouseEventHandler, ReactNode } from "react";
 import styles from "./Common.module.css";
 
 /**
@@ -9,6 +8,18 @@ import styles from "./Common.module.css";
  * Note: This component relies on visible children for accessibility.
  * For icon-only buttons, use IconButton component instead.
  */
+type ButtonVariant = "primary" | "secondary" | "operator" | "number" | "clear" | "equals";
+type ButtonType = ButtonHTMLAttributes<HTMLButtonElement>["type"];
+
+interface ButtonProps {
+  children: ReactNode;
+  onClick?: MouseEventHandler<HTMLButtonElement>;
+  variant?: ButtonVariant;
+  disabled?: boolean;
+  type?: ButtonType;
+  className?: string;
+}
+
 function Button({
   children,
   onClick,
@@ -16,8 +27,8 @@ function Button({
   disabled = false,
   type = "button",
   className = "",
-}) {
-  const buttonClass = `${styles.button} ${styles[`button--${variant}`]} ${className}`.trim();
+}: ButtonProps) {
+  const buttonClass = `${styles["button"]} ${styles[`button--${variant}`]} ${className}`.trim();
 
   return (
     <button type={type} onClick={onClick} disabled={disabled} className={buttonClass}>
@@ -25,14 +36,5 @@ function Button({
     </button>
   );
 }
-
-Button.propTypes = {
-  children: PropTypes.node.isRequired,
-  onClick: PropTypes.func,
-  variant: PropTypes.oneOf(["primary", "secondary", "operator", "number", "clear", "equals"]),
-  disabled: PropTypes.bool,
-  type: PropTypes.oneOf(["button", "submit", "reset"]),
-  className: PropTypes.string,
-};
 
 export default Button;
