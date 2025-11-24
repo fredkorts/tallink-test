@@ -24,7 +24,6 @@
   background: var(--color-surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
-  padding: 1rem;
 }
 
 .content {

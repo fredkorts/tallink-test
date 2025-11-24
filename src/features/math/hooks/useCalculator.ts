@@ -131,13 +131,12 @@ export function useCalculator() {
 
       if (prev.operator && prev.firstOperand !== null && !prev.shouldResetInput) {
         const { display, isError } = computeOperation(prev.firstOperand, prev.currentInput, prev.operator);
-        const entry = `${prev.firstOperand}${prev.operator}${prev.currentInput}=${display}`;
         return {
           currentInput: display,
           firstOperand: display,
           operator: incomingOperator,
           result: display,
-          lastEntry: entry,
+          lastEntry: null,
           isError,
           shouldResetInput: true,
         };
