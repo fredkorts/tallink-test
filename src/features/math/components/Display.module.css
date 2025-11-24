@@ -8,6 +8,38 @@
   gap: 0.75rem;
 }
 
+.modeToggle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 700;
+  margin-bottom: auto;
+  color: var(--color-text-muted);
+}
+
+.modeToggleLabel {
+  color: var(--color-text);
+}
+
+.modeToggleDivider {
+  color: var(--color-text-muted);
+}
+
+.modeToggleButton {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+}
+
+.modeToggleButton:hover,
+.modeToggleButton:focus-visible {
+  text-decoration: underline;
+}
+
 .history {
   display: flex;
   flex-direction: column;

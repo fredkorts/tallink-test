@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { useCalculator, type Operator } from "../hooks/useCalculator";
 import useHistory from "../hooks/useHistory";
-import { CALCULATOR_MODES, OPERATIONS } from "../../../utils/constants";
+import { CALCULATOR_MODES, OPERATIONS, type CalculatorMode } from "../../../utils/constants";
 import styles from "./MathCalculator.module.css";
 import CalculatorLayout from "./CalculatorLayout";
 import { useCurrencyRates } from "../../../hooks/useCurrencyRates";
 
 interface MathCalculatorProps {
-  mode: "math" | "currency";
+  mode: CalculatorMode;
+  onModeChange: (mode: CalculatorMode) => void;
 }
 
-export default function MathCalculator({ mode }: MathCalculatorProps) {
+export default function MathCalculator({ mode, onModeChange }: MathCalculatorProps) {
   // Math mode state/hooks
   const {
     expression,
@@ -184,9 +185,10 @@ export default function MathCalculator({ mode }: MathCalculatorProps) {
 
   // Layout props
   const displayProps = isMathMode
-    ? { mode: "math", expression, result, history, isError }
+    ? { mode: "math", expression, result, history, isError, onModeChange }
     : {
         mode: "currency" as const,
+        onModeChange,
         fromCurrency,
         toCurrency,
         currencies,

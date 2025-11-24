@@ -1,10 +1,11 @@
 import React from "react";
-import Display from "./Display";
+import Display, { type DisplayProps } from "./Display";
 import Keypad from "./Keypad";
+import type { CalculatorMode } from "../../../utils/constants";
 
 interface CalculatorLayoutProps {
-  mode: "math" | "currency";
-  displayProps: any;
+  mode: CalculatorMode;
+  displayProps: DisplayProps;
   keypadProps: any;
 }
 
