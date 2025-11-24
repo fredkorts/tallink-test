@@ -28,6 +28,7 @@ export default function MathCalculator({ mode }: MathCalculatorProps) {
 
   // Currency data from API
   const { currencies, loading: ratesLoading, error: ratesError, convert } = useCurrencyRates();
+  console.log("Currencies loaded:", currencies);
 
   // Currency mode state
   const [fromCurrency, setFromCurrency] = useState("USD");
