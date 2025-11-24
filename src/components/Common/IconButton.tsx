@@ -1,5 +1,5 @@
 import type { ButtonHTMLAttributes, MouseEventHandler, ReactNode } from "react";
-import styles from "./Common.module.css";
+import styles from "./IconButton.module.css";
 
 /**
  * Button component with icon support

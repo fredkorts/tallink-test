@@ -1,5 +1,5 @@
 import type { ButtonHTMLAttributes, MouseEventHandler, ReactNode } from "react";
-import styles from "./Common.module.css";
+import styles from "./Button.module.css";
 
 /**
  * Reusable button component with multiple variants
