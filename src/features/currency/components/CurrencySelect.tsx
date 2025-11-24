@@ -1,4 +1,5 @@
 import { CurrencyCode } from "../../../utils/constants";
+import styles from "./CurrencySelect.module.css";
 
 interface CurrencySelectProps {
   value: CurrencyCode;
@@ -8,12 +9,13 @@ interface CurrencySelectProps {
 
 export default function CurrencySelect({ value, options, onChange }: CurrencySelectProps) {
   return (
-    <label className="currency-select">
+    <label>
       <span className="sr-only">Currency</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value as CurrencyCode)}
         aria-label="Currency selector"
+        className={styles["select"]}
       >
         {options.map((option) => (
           <option key={option} value={option}>

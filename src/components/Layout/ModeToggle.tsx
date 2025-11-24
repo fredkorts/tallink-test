@@ -19,15 +19,21 @@ function ModeToggle({ mode, onModeChange }: ModeToggleProps) {
   const isMathMode = mode === CALCULATOR_MODES.MATH;
 
   return (
-    <div className={styles["modeToggle"]}>
+    <div>
       <button
         type="button"
         onClick={handleToggle}
         className={styles["toggleButton"]}
         aria-label={`Switch to ${isMathMode ? "Currency" : "Math"} mode`}
       >
-        <span className={`${styles["toggleOption"]} ${isMathMode ? styles["active"] : ""}`}>Math</span>
-        <span className={`${styles["toggleOption"]} ${!isMathMode ? styles["active"] : ""}`}>
+        <span
+          className={`${styles["toggleOption"]} ${isMathMode ? styles["toggleOptionActive"] : ""}`}
+        >
+          Math
+        </span>
+        <span
+          className={`${styles["toggleOption"]} ${!isMathMode ? styles["toggleOptionActive"] : ""}`}
+        >
           Currency
         </span>
         <span className={styles["toggleSlider"]} data-active={isMathMode ? "math" : "currency"} />

@@ -17,13 +17,17 @@ function AppLayout({ mode, onModeChange, children }: AppLayoutProps) {
   const modeLabel = MODE_LABELS[mode] || mode;
 
   return (
-    <div className={`${styles["appLayout"]} app-layout`}>
+    <div className={`container ${styles["appLayout"]}`}>
       <header className={styles["header"]}>
         <h1 className={styles["title"]}>Calculator</h1>
-        <ModeToggle mode={mode} onModeChange={onModeChange} />
+        <div className={styles["modeToggleRegion"]}>
+          <ModeToggle mode={mode} onModeChange={onModeChange} />
+        </div>
       </header>
 
-      <main className={styles["content"]}>{children}</main>
+      <main className={styles["content"]}>
+        <div className={styles["contentCard"]}>{children}</div>
+      </main>
 
       <footer className={styles["footer"]}>
         <p className={styles["footerText"]}>Mode: {modeLabel}</p>

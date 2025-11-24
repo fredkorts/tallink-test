@@ -1,0 +1,10 @@
+.rateUpdate {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-text-muted);
+}
+
+.label {
+  font-weight: 600;
+}

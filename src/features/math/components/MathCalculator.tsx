@@ -4,6 +4,7 @@ import Keypad from "./Keypad.tsx";
 import { useCalculator, type Operator } from "../hooks/useCalculator";
 import useHistory from "../hooks/useHistory";
 import { OPERATIONS } from "../../../utils/constants";
+import styles from "./MathCalculator.module.css";
 
 export default function MathCalculator() {
   const {
@@ -65,7 +66,7 @@ export default function MathCalculator() {
   }, [handleBackspace, handleClear, handleDecimalInput, handleEquals, handleNumberInput, handleOperatorInput]);
 
   return (
-    <div className="math-calculator">
+    <div className={styles["wrapper"]}>
       <Display expression={expression} result={result} history={history} isError={isError} />
       {/* <HistoryPanel history={history} /> */}
       <Keypad

@@ -7,6 +7,7 @@ import { useCurrencyRates } from "../hooks/useCurrencyRates";
 import { useCurrencyConverter } from "../hooks/useCurrencyConverter";
 import { CURRENCIES } from "../../../utils/constants";
 import { formatCurrency } from "../utils/currencyFormatters";
+import styles from "./CurrencyConverter.module.css";
 
 export default function CurrencyConverter() {
   const { rates, loading, error, refresh, elapsed } = useCurrencyRates();
@@ -25,11 +26,11 @@ export default function CurrencyConverter() {
   } = useCurrencyConverter(rates);
 
   return (
-    <div className="currency-converter">
-      <div className="converter-header">
+    <div className={styles["converter"]}>
+      <div className={styles["header"]}>
         <div>
           <h2>Exchange Rate</h2>
-          <p className="converter-subtitle">Live conversion between your favorite currencies.</p>
+          <p className={styles["subtitle"]}>Live conversion between your favorite currencies.</p>
         </div>
         <RateUpdateInfo elapsed={elapsed} onRefresh={refresh} loading={loading} />
       </div>
@@ -37,7 +38,7 @@ export default function CurrencyConverter() {
       {error && <ErrorMessage message={error} />}
       {loading && <LoadingSpinner />}
 
-      <div className="currency-inputs">
+      <div className={styles["inputs"]}>
         <CurrencyInput
           label="From"
           currency={sourceCurrency}
@@ -60,12 +61,12 @@ export default function CurrencyConverter() {
           readOnly
         />
 
-        <button type="button" className="swap-btn" onClick={swapCurrencies} aria-label="Swap currencies">
+        <button type="button" className={styles["swapButton"]} onClick={swapCurrencies} aria-label="Swap currencies">
           ⇄
         </button>
       </div>
 
-      <div className="conversion-result" aria-live="polite">
+      <div className={styles["result"]} aria-live="polite">
         {`${amount || 0} ${sourceCurrency} = ${formatCurrency(convertedAmount)} ${targetCurrency}`}
       </div>
 
