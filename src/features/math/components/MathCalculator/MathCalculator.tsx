@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
-import { useCalculator, type Operator } from "../hooks/useCalculator";
-import useHistory from "../hooks/useHistory";
-import { CALCULATOR_MODES, OPERATIONS, type CalculatorMode } from "../../../utils/constants";
+import { useCalculator, type Operator } from "../../hooks/useCalculator";
+import useHistory from "../../hooks/useHistory";
+import { CALCULATOR_MODES, OPERATIONS, type CalculatorMode } from "../../../../utils/constants";
 import styles from "./MathCalculator.module.css";
-import CalculatorLayout from "./CalculatorLayout";
-import { useCurrencyRates } from "../../../hooks/useCurrencyRates";
+import CalculatorLayout from "../CalculatorLayout";
+import { useCurrencyRates } from "../../../../hooks/useCurrencyRates";
+import { KeypadProps } from "../Keypad/Keypad";
 
-interface MathCalculatorProps {
+export interface MathCalculatorProps {
   mode: CalculatorMode;
   onModeChange: (mode: CalculatorMode) => void;
 }
@@ -29,7 +30,6 @@ export default function MathCalculator({ mode, onModeChange }: MathCalculatorPro
 
   // Currency data from API
   const { currencies, loading: ratesLoading, error: ratesError, convert } = useCurrencyRates();
-  console.log("Currencies loaded:", currencies);
 
   // Currency mode state
   const [fromCurrency, setFromCurrency] = useState("USD");
@@ -231,9 +231,8 @@ export default function MathCalculator({ mode, onModeChange }: MathCalculatorPro
 
   const displayProps = isMathMode ? mathDisplayProps : currencyDisplayProps;
   const noopOperator: (op: Operator) => void = () => {};
-  const keypadProps = isMathMode
+  const keypadProps: Omit<KeypadProps, "mode"> = isMathMode
     ? {
-        mode: "math" as const,
         onNumber: handleNumberInput,
         onDecimal: handleDecimalInput,
         onOperator: handleOperatorInput,
@@ -242,7 +241,6 @@ export default function MathCalculator({ mode, onModeChange }: MathCalculatorPro
         onBackspace: handleBackspace,
       }
     : {
-        mode: "currency" as const,
         onNumber: appendDigit,
         onDecimal: handleDecimalInputCurrency,
         onOperator: noopOperator,

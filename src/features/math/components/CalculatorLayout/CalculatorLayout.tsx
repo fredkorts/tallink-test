@@ -1,6 +1,6 @@
 import React from "react";
-import Display, { type DisplayProps } from "./Display";
-import Keypad from "./Keypad";
+import Display, { DisplayProps } from "../Display/Display";
+import Keypad from "../Keypad/Keypad";
 
 interface CalculatorLayoutProps {
   displayProps: DisplayProps;
