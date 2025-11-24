@@ -1,14 +1,16 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useCalculator, type Operator } from "../hooks/useCalculator";
 import useHistory from "../hooks/useHistory";
-import { OPERATIONS } from "../../../utils/constants";
+import { CALCULATOR_MODES, OPERATIONS } from "../../../utils/constants";
 import styles from "./MathCalculator.module.css";
 import CalculatorLayout from "./CalculatorLayout";
+import { useCurrencyRates } from "../../../hooks/useCurrencyRates";
 
-export default function MathCalculator() {
-  // Mode state: 'math' or 'currency'
-  const [mode, setMode] = useState<'math' | 'currency'>('math');
+interface MathCalculatorProps {
+  mode: "math" | "currency";
+}
 
+export default function MathCalculator({ mode }: MathCalculatorProps) {
   // Math mode state/hooks
   const {
     expression,
@@ -24,36 +26,128 @@ export default function MathCalculator() {
   } = useCalculator();
   const { history, addHistoryEntry } = useHistory();
 
-  // Currency mode state
-  const [fromCurrency, setFromCurrency] = useState('USD');
-  const [toCurrency, setToCurrency] = useState('EUR');
-  const [inputValue, setInputValue] = useState('');
-  const [outputValue, setOutputValue] = useState('');
+  // Currency data from API
+  const { currencies, loading: ratesLoading, error: ratesError, convert } = useCurrencyRates();
 
-  // Example conversion logic (replace with real API/service)
+  // Currency mode state
+  const [fromCurrency, setFromCurrency] = useState("USD");
+  const [toCurrency, setToCurrency] = useState("EUR");
+  const [inputValue, setInputValue] = useState("0");
+  const [outputValue, setOutputValue] = useState("0");
+
+  const isMathMode = mode === CALCULATOR_MODES.MATH;
+
+  // Set default currencies when rates load
   useEffect(() => {
-    if (mode === 'currency') {
-      // Simple mock: 1 USD = 1.1865 EUR
-      const rate = 1.1865;
-      const val = parseFloat(inputValue);
-      if (!isNaN(val)) {
-        setOutputValue((val * rate).toLocaleString(undefined, { maximumFractionDigits: 4 }));
-      } else {
-        setOutputValue('');
-      }
+    if (currencies.length === 0) return;
+    setFromCurrency((prev) => {
+      if (prev && currencies.includes(prev)) return prev;
+      return currencies[0] ?? prev ?? "USD";
+    });
+    setToCurrency((prev) => {
+      if (prev && currencies.includes(prev) && prev !== fromCurrency) return prev;
+      const alternate = currencies.find((code) => code !== fromCurrency);
+      return alternate ?? prev ?? "EUR";
+    });
+  }, [currencies, fromCurrency, toCurrency]);
+
+  const ensureDistinctCurrency = useCallback(
+    (next: string, other: string) => {
+      if (next !== other) return next;
+      const alternate = currencies.find((code) => code !== next);
+      return alternate ?? next;
+    },
+    [currencies],
+  );
+
+  const handleFromCurrencyChange = useCallback(
+    (code: string) => {
+      setFromCurrency(code);
+      setToCurrency((prev) => ensureDistinctCurrency(prev, code));
+    },
+    [ensureDistinctCurrency],
+  );
+
+  const handleToCurrencyChange = useCallback(
+    (code: string) => {
+      setToCurrency(code);
+      setFromCurrency((prev) => ensureDistinctCurrency(prev, code));
+    },
+    [ensureDistinctCurrency],
+  );
+
+  const sanitizeInput = useCallback((value: string) => {
+    const cleaned = value.replace(/[^\d.]/g, "");
+    const [integer = "", ...decimalParts] = cleaned.split(".");
+    const decimal = decimalParts.join("");
+    const sanitizedInteger = integer.replace(/^0+(?=\d)/, "") || "0";
+    if (cleaned.endsWith(".") && decimal === "") {
+      return `${sanitizedInteger}.`;
     }
-  }, [inputValue, fromCurrency, toCurrency, mode]);
+    const sanitizedDecimal = decimal ? `.${decimal.slice(0, 6)}` : "";
+    return `${sanitizedInteger}${sanitizedDecimal}`;
+  }, []);
+
+  const handleInputValueChange = useCallback(
+    (value: string) => {
+      setInputValue(sanitizeInput(value));
+    },
+    [sanitizeInput],
+  );
+
+  const appendDigit = useCallback(
+    (digit: string) => {
+      setInputValue((prev) => {
+        const normalized = prev === "0" ? "" : prev;
+        return sanitizeInput(`${normalized}${digit}`);
+      });
+    },
+    [sanitizeInput],
+  );
+
+  const handleDecimalInputCurrency = useCallback(() => {
+    setInputValue((prev) => (prev.includes(".") ? prev : `${prev}.`));
+  }, []);
+
+  const handleClearCurrency = useCallback(() => {
+    setInputValue("0");
+    setOutputValue("0");
+  }, []);
+
+  const handleBackspaceCurrency = useCallback(() => {
+    setInputValue((prev) => {
+      if (prev.length <= 1) return "0";
+      const next = prev.slice(0, -1);
+      if (next === "" || next === ".") return "0";
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    if (isMathMode) return;
+    const numericInput = parseFloat(inputValue);
+    if (!Number.isFinite(numericInput) || currencies.length === 0 || ratesError) {
+      setOutputValue("");
+      return;
+    }
+    const resultValue = convert(numericInput, fromCurrency, toCurrency);
+    if (resultValue === null) {
+      setOutputValue("");
+      return;
+    }
+    setOutputValue(resultValue.toLocaleString(undefined, { maximumFractionDigits: 4 }));
+  }, [convert, currencies, fromCurrency, inputValue, isMathMode, ratesError, toCurrency]);
 
   // Math history effect
   useEffect(() => {
-    if (mode === 'math' && lastEntry) {
+    if (isMathMode && lastEntry) {
       addHistoryEntry(lastEntry);
     }
-  }, [addHistoryEntry, lastEntry, mode]);
+  }, [addHistoryEntry, isMathMode, lastEntry]);
 
   // Keyboard handler (math mode only)
   useEffect(() => {
-    if (mode !== 'math') return;
+    if (!isMathMode) return;
     const handleKey = (event: KeyboardEvent) => {
       const { key } = event;
       if (/[0-9]/.test(key)) {
@@ -85,24 +179,28 @@ export default function MathCalculator() {
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [handleBackspace, handleClear, handleDecimalInput, handleEquals, handleNumberInput, handleOperatorInput, mode]);
+  }, [handleBackspace, handleClear, handleDecimalInput, handleEquals, handleNumberInput, handleOperatorInput, isMathMode]);
 
   // Layout props
-  const displayProps = mode === 'math'
-    ? { mode: 'math', expression, result, history, isError }
+  const displayProps = isMathMode
+    ? { mode: "math", expression, result, history, isError }
     : {
-        mode: 'currency',
+        mode: "currency" as const,
         fromCurrency,
         toCurrency,
-        onFromCurrencyChange: setFromCurrency,
-        onToCurrencyChange: setToCurrency,
+        currencies,
+        ratesLoading,
+        ratesError,
+        onFromCurrencyChange: handleFromCurrencyChange,
+        onToCurrencyChange: handleToCurrencyChange,
         inputValue,
-        onInputValueChange: setInputValue,
+        onInputValueChange: handleInputValueChange,
         outputValue,
       };
-  const keypadProps = mode === 'math'
+  const noopOperator: (op: Operator) => void = () => {};
+  const keypadProps = isMathMode
     ? {
-        mode: 'math',
+        mode: "math" as const,
         onNumber: handleNumberInput,
         onDecimal: handleDecimalInput,
         onOperator: handleOperatorInput,
@@ -111,22 +209,17 @@ export default function MathCalculator() {
         onBackspace: handleBackspace,
       }
     : {
-        mode: 'currency',
-        onNumber: (digit: string) => setInputValue(val => val + digit),
-        onDecimal: () => setInputValue(val => (val.includes('.') ? val : val + '.')),
-        onOperator: () => {},
+        mode: "currency" as const,
+        onNumber: appendDigit,
+        onDecimal: handleDecimalInputCurrency,
+        onOperator: noopOperator,
         onEquals: () => {},
-        onClear: () => setInputValue(''),
-        onBackspace: () => setInputValue(val => val.slice(0, -1)),
+        onClear: handleClearCurrency,
+        onBackspace: handleBackspaceCurrency,
       };
 
-  // Mode switcher UI (for demonstration)
   return (
     <div className={styles["wrapper"]}>
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
-        <button onClick={() => setMode('math')} disabled={mode === 'math'}>Calculator</button>
-        <button onClick={() => setMode('currency')} disabled={mode === 'currency'}>Exchange Rate</button>
-      </div>
       <CalculatorLayout mode={mode} displayProps={displayProps} keypadProps={keypadProps} />
     </div>
   );

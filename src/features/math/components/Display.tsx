@@ -1,88 +1,107 @@
 import { SPECIAL_VALUES } from "../../../utils/constants";
 import styles from "./Display.module.css";
-import React from "react";
 
-interface DisplayProps {
-  mode?: "math" | "currency";
-  // Math mode props
-  expression?: string;
-  result?: string | null;
-  history?: string[];
-  isError?: boolean;
-  // Currency mode props
-  fromCurrency?: string;
-  toCurrency?: string;
-  onFromCurrencyChange?: (currency: string) => void;
-  onToCurrencyChange?: (currency: string) => void;
-  inputValue?: string;
-  onInputValueChange?: (val: string) => void;
-  outputValue?: string;
-}
+type MathDisplayProps = {
+  mode: "math";
+  expression: string;
+  result: string | null;
+  history: string[];
+  isError: boolean;
+};
+
+type CurrencyDisplayProps = {
+  mode: "currency";
+  fromCurrency: string;
+  toCurrency: string;
+  currencies: string[];
+  ratesLoading: boolean;
+  ratesError: string | null;
+  onFromCurrencyChange: (currency: string) => void;
+  onToCurrencyChange: (currency: string) => void;
+  inputValue: string;
+  onInputValueChange: (val: string) => void;
+  outputValue: string;
+};
+
+type DisplayProps = MathDisplayProps | CurrencyDisplayProps;
 
 export default function Display(props: DisplayProps) {
-  const {
-    mode = "math",
-    expression = "",
-    result = null,
-    history = [],
-    isError = false,
-    fromCurrency = "USD",
-    toCurrency = "EUR",
-    onFromCurrencyChange,
-    onToCurrencyChange,
-    inputValue = "",
-    onInputValueChange,
-    outputValue = "",
-  } = props;
+  if (props.mode === "currency") {
+    const {
+      fromCurrency,
+      toCurrency,
+      currencies,
+      ratesLoading,
+      ratesError,
+      onFromCurrencyChange,
+      onToCurrencyChange,
+      inputValue,
+      onInputValueChange,
+      outputValue,
+    } = props;
 
-  if (mode === "currency") {
+    const currencyOptions = currencies || [];
+    const fromOptions = currencyOptions.filter((code) => code === fromCurrency || code !== toCurrency);
+    const toOptions = currencyOptions.filter((code) => code === toCurrency || code !== fromCurrency);
+    const hasCurrencies = fromOptions.length > 0 && toOptions.length > 0;
+
     return (
       <div className={styles["display"]} aria-live="polite">
-        {/* Top row: editable input */}
+        <div className={styles["statusRow"]}>
+          {ratesLoading && <span className={styles["statusMuted"]}>Loading rates…</span>}
+          {ratesError && <span className={styles["statusError"]}>{ratesError}</span>}
+        </div>
         <div className={styles["currencyRow"]}>
           <select
             className={styles["currencySelect"]}
             value={fromCurrency}
-            onChange={e => onFromCurrencyChange && onFromCurrencyChange(e.target.value)}
+            onChange={(e) => onFromCurrencyChange(e.target.value)}
+            disabled={!hasCurrencies || ratesLoading}
           >
-            {/* Example options, replace with real list */}
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="GBP">GBP</option>
+            {fromOptions.map((code) => (
+              <option key={code} value={code} disabled={code === toCurrency}>
+                {code}
+              </option>
+            ))}
           </select>
           <input
             className={styles["currencyInput"]}
             type="text"
             value={inputValue}
-            onChange={e => onInputValueChange && onInputValueChange(e.target.value)}
+            onChange={(e) => onInputValueChange(e.target.value)}
             inputMode="decimal"
+            aria-label="Amount to convert"
+            disabled={ratesLoading || !hasCurrencies}
           />
         </div>
-        {/* Bottom row: calculated output */}
         <div className={styles["currencyRow"]}>
           <select
             className={styles["currencySelect"]}
             value={toCurrency}
-            onChange={e => onToCurrencyChange && onToCurrencyChange(e.target.value)}
+            onChange={(e) => onToCurrencyChange(e.target.value)}
+            disabled={!hasCurrencies || ratesLoading}
           >
-            {/* Example options, replace with real list */}
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="GBP">GBP</option>
+            {toOptions.map((code) => (
+              <option key={code} value={code} disabled={code === fromCurrency}>
+                {code}
+              </option>
+            ))}
           </select>
-          <div className={styles["currencyOutput"]}>{outputValue}</div>
+          <div className={styles["currencyOutput"]} aria-live="polite">
+            {outputValue || (ratesLoading ? "…" : "")}
+          </div>
         </div>
       </div>
     );
   }
 
   // Math mode (default)
-  const visibleValue = isError ? SPECIAL_VALUES.NAN : result ?? expression;
+  const visibleValue = props.isError ? SPECIAL_VALUES.NAN : props.result ?? props.expression;
   return (
     <div className={styles["display"]} aria-live="polite">
       <div className={styles["history"]}>
-        {history.length > 0 ? (
-          history.slice(-3).map((entry, i) => <div key={i}>{entry}</div>)
+        {props.history.length > 0 ? (
+          props.history.slice(-3).map((entry, i) => <div key={i}>{entry}</div>)
         ) : (
           <span>&nbsp;</span>
         )}
