@@ -37,7 +37,7 @@ export default function MathCalculator({ mode, onModeChange }: MathCalculatorPro
   const [inputValue, setInputValue] = useState("0");
   const [outputValue, setOutputValue] = useState("0");
 
-  const isMathMode = mode === CALCULATOR_MODES.MATH;
+  const isMathMode: boolean = mode === CALCULATOR_MODES.MATH;
 
   // Set default currencies when rates load
   useEffect(() => {
@@ -184,22 +184,52 @@ export default function MathCalculator({ mode, onModeChange }: MathCalculatorPro
   }, [handleBackspace, handleClear, handleDecimalInput, handleEquals, handleNumberInput, handleOperatorInput, isMathMode]);
 
   // Layout props
-  const displayProps = isMathMode
-    ? { mode: "math", expression, result, history, isError, onModeChange }
-    : {
-        mode: "currency" as const,
-        onModeChange,
-        fromCurrency,
-        toCurrency,
-        currencies,
-        ratesLoading,
-        ratesError,
-        onFromCurrencyChange: handleFromCurrencyChange,
-        onToCurrencyChange: handleToCurrencyChange,
-        inputValue,
-        onInputValueChange: handleInputValueChange,
-        outputValue,
-      };
+  // Explicitly type displayProps to ensure mode is a string literal
+  const mathDisplayProps: {
+    mode: "math";
+    expression: typeof expression;
+    result: typeof result;
+    history: typeof history;
+    isError: typeof isError;
+    onModeChange: typeof onModeChange;
+  } = {
+    mode: "math",
+    expression,
+    result,
+    history,
+    isError,
+    onModeChange,
+  };
+
+  const currencyDisplayProps: {
+    mode: "currency";
+    onModeChange: typeof onModeChange;
+    fromCurrency: typeof fromCurrency;
+    toCurrency: typeof toCurrency;
+    currencies: typeof currencies;
+    ratesLoading: typeof ratesLoading;
+    ratesError: typeof ratesError;
+    onFromCurrencyChange: (code: string) => void;
+    onToCurrencyChange: (code: string) => void;
+    inputValue: typeof inputValue;
+    onInputValueChange: (value: string) => void;
+    outputValue: typeof outputValue;
+  } = {
+    mode: "currency",
+    onModeChange,
+    fromCurrency,
+    toCurrency,
+    currencies,
+    ratesLoading,
+    ratesError,
+    onFromCurrencyChange: handleFromCurrencyChange,
+    onToCurrencyChange: handleToCurrencyChange,
+    inputValue,
+    onInputValueChange: handleInputValueChange,
+    outputValue,
+  };
+
+  const displayProps = isMathMode ? mathDisplayProps : currencyDisplayProps;
   const noopOperator: (op: Operator) => void = () => {};
   const keypadProps = isMathMode
     ? {
@@ -223,7 +253,7 @@ export default function MathCalculator({ mode, onModeChange }: MathCalculatorPro
 
   return (
     <div className={styles["wrapper"]}>
-      <CalculatorLayout mode={mode} displayProps={displayProps} keypadProps={keypadProps} />
+      <CalculatorLayout displayProps={displayProps} keypadProps={keypadProps} />
     </div>
   );
 }
