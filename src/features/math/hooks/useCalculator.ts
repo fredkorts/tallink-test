@@ -97,6 +97,7 @@ export function useCalculator() {
 
       return {
         ...prev,
+        lastEntry: prev.shouldResetInput ? null : prev.lastEntry,
         currentInput: formatInput(nextInput),
         shouldResetInput: false,
         isError: false,
@@ -113,6 +114,7 @@ export function useCalculator() {
       const nextInput = `${base}${DECIMAL_POINT}`;
       return {
         ...prev,
+        lastEntry: prev.shouldResetInput ? null : prev.lastEntry,
         currentInput: nextInput,
         shouldResetInput: false,
         result: null,
@@ -128,7 +130,7 @@ export function useCalculator() {
 
       // If operator exists and user hits another operator before typing second operand, just swap
       if (prev.operator && prev.shouldResetInput) {
-        return { ...prev, operator: incomingOperator };
+        return { ...prev, operator: incomingOperator, lastEntry: null };
       }
 
       // Chain operations: compute the result and continue with new operator
@@ -149,6 +151,7 @@ export function useCalculator() {
       // Start new operation
       return {
         ...prev,
+        lastEntry: prev.shouldResetInput ? null : prev.lastEntry,
         firstOperand: prev.currentInput,
         operator: incomingOperator,
         shouldResetInput: true,
