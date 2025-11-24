@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
-import styles from "./Layout.module.css";
+import styles from "./AppLayout.module.css";
 
 /**
  * Main application layout wrapper
  * Provides structure for header and content area
  */
-interface AppLayoutProps {
+export interface AppLayoutProps {
   children: ReactNode;
 }
 

@@ -1,10 +1,10 @@
-import styles from "./Layout.module.css";
+import styles from "./Header.module.css";
 
 /**
  * Application header with title and branding
  * Optional component for additional branding/navigation
  */
-interface HeaderProps {
+export interface HeaderProps {
   title?: string;
   subtitle?: string;
 }

@@ -1,11 +1,11 @@
 import { CALCULATOR_MODES, type CalculatorMode } from "../../utils/constants";
-import styles from "./Layout.module.css";
+import styles from "./ModeToggle.module.css";
 
 /**
  * Toggle switch for Math/Currency mode
  * Allows user to switch between calculator modes
  */
-interface ModeToggleProps {
+export interface ModeToggleProps {
   mode: CalculatorMode;
   onModeChange: (mode: CalculatorMode) => void;
 }
