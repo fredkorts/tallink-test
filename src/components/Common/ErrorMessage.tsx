@@ -1,4 +1,4 @@
-import styles from "./Common.module.css";
+import styles from "./ErrorMessage.module.css";
 
 /**
  * Error message component for displaying errors, warnings, and info messages

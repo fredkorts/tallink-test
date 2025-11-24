@@ -1,6 +1,7 @@
 import { ChangeEvent } from "react";
 import { CurrencyCode } from "../../../utils/constants";
 import CurrencySelect from "./CurrencySelect";
+import styles from "./CurrencyInput.module.css";
 
 interface CurrencyInputProps {
   label: string;
@@ -28,16 +29,12 @@ export default function CurrencyInput({
   };
 
   return (
-    <div className="currency-input">
-      <div className="currency-input__label">{label}</div>
-      <div className="currency-input__row">
-        <CurrencySelect
-          value={currency}
-          options={currencies}
-          onChange={onCurrencyChange}
-        />
+    <div className={styles["input"]}>
+      <div className={styles["label"]}>{label}</div>
+      <div className={styles["row"]}>
+        <CurrencySelect value={currency} options={currencies} onChange={onCurrencyChange} />
         <input
-          className="currency-input__field"
+          className={styles["field"]}
           value={amount}
           onChange={handleChange}
           readOnly={readOnly}

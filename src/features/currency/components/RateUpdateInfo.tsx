@@ -1,5 +1,6 @@
 import IconButton from "../../../components/Common/IconButton";
 import LoadingSpinner from "../../../components/Common/LoadingSpinner";
+import styles from "./RateUpdateInfo.module.css";
 
 interface RateUpdateInfoProps {
   elapsed: string;
@@ -9,8 +10,8 @@ interface RateUpdateInfoProps {
 
 export default function RateUpdateInfo({ elapsed, onRefresh, loading }: RateUpdateInfoProps) {
   return (
-    <div className="rate-update" aria-live="polite">
-      <div className="rate-update__label">{elapsed ? `Updated ${elapsed}` : "Fetching rates..."}</div>
+    <div className={styles["rateUpdate"]} aria-live="polite">
+      <div className={styles["label"]}>{elapsed ? `Updated ${elapsed}` : "Fetching rates..."}</div>
       <IconButton
         icon="⟳"
         ariaLabel="Refresh rates"

@@ -1,4 +1,4 @@
-import styles from "./Common.module.css";
+import styles from "./LoadingSpinner.module.css";
 
 /**
  * Loading spinner component with size variants
