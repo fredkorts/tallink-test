@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import ModeToggle from "./ModeToggle";
-import { MODE_LABELS, type CalculatorMode } from "../../utils/constants";
+import { type CalculatorMode } from "../../utils/constants";
 import styles from "./Layout.module.css";
 
 /**

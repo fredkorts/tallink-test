@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { fetchRates } from "../../../services/ratesService";
-import { CurrencyRates } from "../../../services/types";
-import { formatElapsedTime } from "../utils/timeFormatters";
+import { fetchRates } from "../services/ratesService";
+import type { CurrencyRates } from "../services/types";
 
 interface CurrencyRatesState {
   rates: CurrencyRates | null;
@@ -10,7 +9,17 @@ interface CurrencyRatesState {
   error: string | null;
 }
 
-export function useCurrencyRates() {
+export interface UseCurrencyRatesResult {
+  rates: CurrencyRates | null;
+  currencies: string[];
+  timestamp: string | null;
+  loading: boolean;
+  error: string | null;
+  refresh: () => Promise<void>;
+  convert: (amount: number, from: string, to: string) => number | null;
+}
+
+export function useCurrencyRates(): UseCurrencyRatesResult {
   const [state, setState] = useState<CurrencyRatesState>({
     rates: null,
     timestamp: null,
@@ -41,17 +50,29 @@ export function useCurrencyRates() {
     loadRates();
   }, [loadRates]);
 
-  const elapsed = useMemo(
-    () => (state.timestamp ? formatElapsedTime(state.timestamp) : ""),
-    [state.timestamp],
+  const currencies = useMemo(() => {
+    if (!state.rates) return [];
+    return Object.keys(state.rates).sort();
+  }, [state.rates]);
+
+  const convert = useCallback(
+    (amount: number, from: string, to: string) => {
+      if (!state.rates || !Number.isFinite(amount)) return null;
+      if (from === to) return amount;
+      const rate = state.rates[from]?.[to];
+      if (typeof rate !== "number") return null;
+      return amount * rate;
+    },
+    [state.rates],
   );
 
   return {
     rates: state.rates,
+    currencies,
     timestamp: state.timestamp,
     loading: state.loading,
     error: state.error,
     refresh: loadRates,
-    elapsed,
+    convert,
   };
 }
