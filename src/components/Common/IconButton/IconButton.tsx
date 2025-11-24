@@ -11,7 +11,7 @@ import styles from "./IconButton.module.css";
 type IconButtonVariant = "default" | "primary" | "secondary";
 type ButtonType = ButtonHTMLAttributes<HTMLButtonElement>["type"];
 
-interface IconButtonProps {
+export interface IconButtonProps {
   children?: ReactNode;
   icon: ReactNode;
   onClick?: MouseEventHandler<HTMLButtonElement>;

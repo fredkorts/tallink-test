@@ -11,7 +11,7 @@ import styles from "./Button.module.css";
 type ButtonVariant = "primary" | "secondary" | "operator" | "number" | "clear" | "equals";
 type ButtonType = ButtonHTMLAttributes<HTMLButtonElement>["type"];
 
-interface ButtonProps {
+export interface ButtonProps {
   children: ReactNode;
   onClick?: MouseEventHandler<HTMLButtonElement>;
   variant?: ButtonVariant;

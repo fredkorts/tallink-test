@@ -1,4 +1,4 @@
-import { CALCULATOR_MODES, type CalculatorMode, SPECIAL_VALUES } from "../../../utils/constants";
+import { CALCULATOR_MODES, type CalculatorMode, SPECIAL_VALUES } from "../../../../utils/constants";
 import styles from "./Display.module.css";
 
 type BaseDisplayProps = {
