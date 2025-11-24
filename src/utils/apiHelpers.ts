@@ -33,11 +33,10 @@ export async function apiRequest<T = unknown>(
       headers,
     });
 
-    // Handle empty response (204 No Content, Content-Length: 0, or no body)
+    // Handle empty response (204 No Content or explicit zero length)
     if (
       response.status === 204 ||
-      response.headers.get('content-length') === '0' ||
-      response.headers.get('transfer-encoding') === null && !('body' in response)
+      response.headers.get('content-length') === '0'
     ) {
       if (!response.ok) {
         throw new ApiError(`HTTP error! status: ${response.status}`, response.status);
