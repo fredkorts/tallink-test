@@ -13,9 +13,11 @@ interface KeypadProps {
   onEquals: () => void;
   onClear: () => void;
   onBackspace: () => void;
+  mode?: "math" | "currency";
 }
 
-export default function Keypad({ onNumber, onDecimal, onOperator, onEquals, onClear, onBackspace }: KeypadProps) {
+export default function Keypad({ onNumber, onDecimal, onOperator, onEquals, onClear, onBackspace, mode = "math" }: KeypadProps) {
+  const isMath = mode === "math";
   return (
     <div className={styles["keypad"]}>
       <div className={styles["row"]}>
@@ -29,16 +31,12 @@ export default function Keypad({ onNumber, onDecimal, onOperator, onEquals, onCl
         >
           &#9003;
         </button>
-        <button className={`${styles["button"]} ${styles["prime"]}`} aria-label="Prime" onClick={() => onOperator("P")}>
-          P
-        </button>
-        <button
-          className={`${styles["button"]} ${styles["operator"]}`}
-          aria-label="Divide"
-          onClick={() => onOperator("÷")}
-        >
-          ÷
-        </button>
+        {isMath && (
+          <>
+            <button className={`${styles["button"]} ${styles["prime"]}`} aria-label="Prime" onClick={() => onOperator("P")}>P</button>
+            <button className={`${styles["button"]} ${styles["operator"]}`} aria-label="Divide" onClick={() => onOperator("÷")}>÷</button>
+          </>
+        )}
       </div>
       <div className={styles["row"]}>
         <button className={styles["button"]} onClick={() => onNumber("7")}>
@@ -50,13 +48,9 @@ export default function Keypad({ onNumber, onDecimal, onOperator, onEquals, onCl
         <button className={styles["button"]} onClick={() => onNumber("9")}>
           9
         </button>
-        <button
-          className={`${styles["button"]} ${styles["operator"]}`}
-          aria-label="Multiply"
-          onClick={() => onOperator("×")}
-        >
-          ×
-        </button>
+        {isMath && (
+          <button className={`${styles["button"]} ${styles["operator"]}`} aria-label="Multiply" onClick={() => onOperator("×")}>×</button>
+        )}
       </div>
       <div className={styles["row"]}>
         <button className={styles["button"]} onClick={() => onNumber("4")}>
@@ -68,13 +62,9 @@ export default function Keypad({ onNumber, onDecimal, onOperator, onEquals, onCl
         <button className={styles["button"]} onClick={() => onNumber("6")}>
           6
         </button>
-        <button
-          className={`${styles["button"]} ${styles["operator"]}`}
-          aria-label="Subtract"
-          onClick={() => onOperator("-")}
-        >
-          -
-        </button>
+        {isMath && (
+          <button className={`${styles["button"]} ${styles["operator"]}`} aria-label="Subtract" onClick={() => onOperator("-")}>-</button>
+        )}
       </div>
       <div className={styles["row"]}>
         <button className={styles["button"]} onClick={() => onNumber("1")}>
@@ -86,24 +76,24 @@ export default function Keypad({ onNumber, onDecimal, onOperator, onEquals, onCl
         <button className={styles["button"]} onClick={() => onNumber("3")}>
           3
         </button>
-        <button
-          className={`${styles["button"]} ${styles["operator"]}`}
-          aria-label="Add"
-          onClick={() => onOperator("+")}
-        >
-          +
-        </button>
+        {isMath && (
+          <button className={`${styles["button"]} ${styles["operator"]}`} aria-label="Add" onClick={() => onOperator("+")}>+</button>
+        )}
       </div>
       <div className={styles["row"]}>
-        <button className={styles["button"]} onClick={() => onNumber("0")}>
-          0
-        </button>
-        <button className={styles["button"]} onClick={onDecimal}>
-          .
-        </button>
-        <button className={`${styles["button"]} ${styles["equals"]}`} aria-label="Equals" onClick={onEquals}>
-          =
-        </button>
+        {mode === "currency" ? (
+          <>
+            <button className={styles["button"]} onClick={() => onNumber("00")}>00</button>
+            <button className={styles["button"]} onClick={() => onNumber("0")}>0</button>
+            <button className={styles["button"]} onClick={onDecimal}>.</button>
+          </>
+        ) : (
+          <>
+            <button className={styles["button"]} onClick={() => onNumber("0")}>0</button>
+            <button className={styles["button"]} onClick={onDecimal}>.</button>
+            <button className={`${styles["button"]} ${styles["equals"]}`} aria-label="Equals" onClick={onEquals}>=</button>
+          </>
+        )}
       </div>
     </div>
   );

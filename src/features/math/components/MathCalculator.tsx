@@ -1,12 +1,15 @@
-import { useEffect } from "react";
-import Display from "./Display.tsx";
-import Keypad from "./Keypad.tsx";
+import { useEffect, useState } from "react";
 import { useCalculator, type Operator } from "../hooks/useCalculator";
 import useHistory from "../hooks/useHistory";
 import { OPERATIONS } from "../../../utils/constants";
 import styles from "./MathCalculator.module.css";
+import CalculatorLayout from "./CalculatorLayout";
 
 export default function MathCalculator() {
+  // Mode state: 'math' or 'currency'
+  const [mode, setMode] = useState<'math' | 'currency'>('math');
+
+  // Math mode state/hooks
   const {
     expression,
     result,
@@ -19,16 +22,38 @@ export default function MathCalculator() {
     handleClear,
     handleBackspace,
   } = useCalculator();
-
   const { history, addHistoryEntry } = useHistory();
 
+  // Currency mode state
+  const [fromCurrency, setFromCurrency] = useState('USD');
+  const [toCurrency, setToCurrency] = useState('EUR');
+  const [inputValue, setInputValue] = useState('');
+  const [outputValue, setOutputValue] = useState('');
+
+  // Example conversion logic (replace with real API/service)
   useEffect(() => {
-    if (lastEntry) {
+    if (mode === 'currency') {
+      // Simple mock: 1 USD = 1.1865 EUR
+      const rate = 1.1865;
+      const val = parseFloat(inputValue);
+      if (!isNaN(val)) {
+        setOutputValue((val * rate).toLocaleString(undefined, { maximumFractionDigits: 4 }));
+      } else {
+        setOutputValue('');
+      }
+    }
+  }, [inputValue, fromCurrency, toCurrency, mode]);
+
+  // Math history effect
+  useEffect(() => {
+    if (mode === 'math' && lastEntry) {
       addHistoryEntry(lastEntry);
     }
-  }, [addHistoryEntry, lastEntry, result]);
+  }, [addHistoryEntry, lastEntry, mode]);
 
+  // Keyboard handler (math mode only)
   useEffect(() => {
+    if (mode !== 'math') return;
     const handleKey = (event: KeyboardEvent) => {
       const { key } = event;
       if (/[0-9]/.test(key)) {
@@ -47,9 +72,7 @@ export default function MathCalculator() {
         };
         const operatorKey = key as keyof typeof operatorMap;
         const operator = operatorMap[operatorKey];
-
         if (!operator) return;
-
         handleOperatorInput(operator);
       } else if (key === "Enter" || key === "=") {
         event.preventDefault();
@@ -60,23 +83,51 @@ export default function MathCalculator() {
         handleClear();
       }
     };
-
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [handleBackspace, handleClear, handleDecimalInput, handleEquals, handleNumberInput, handleOperatorInput]);
+  }, [handleBackspace, handleClear, handleDecimalInput, handleEquals, handleNumberInput, handleOperatorInput, mode]);
 
+  // Layout props
+  const displayProps = mode === 'math'
+    ? { mode: 'math', expression, result, history, isError }
+    : {
+        mode: 'currency',
+        fromCurrency,
+        toCurrency,
+        onFromCurrencyChange: setFromCurrency,
+        onToCurrencyChange: setToCurrency,
+        inputValue,
+        onInputValueChange: setInputValue,
+        outputValue,
+      };
+  const keypadProps = mode === 'math'
+    ? {
+        mode: 'math',
+        onNumber: handleNumberInput,
+        onDecimal: handleDecimalInput,
+        onOperator: handleOperatorInput,
+        onEquals: handleEquals,
+        onClear: handleClear,
+        onBackspace: handleBackspace,
+      }
+    : {
+        mode: 'currency',
+        onNumber: (digit: string) => setInputValue(val => val + digit),
+        onDecimal: () => setInputValue(val => (val.includes('.') ? val : val + '.')),
+        onOperator: () => {},
+        onEquals: () => {},
+        onClear: () => setInputValue(''),
+        onBackspace: () => setInputValue(val => val.slice(0, -1)),
+      };
+
+  // Mode switcher UI (for demonstration)
   return (
     <div className={styles["wrapper"]}>
-      <Display expression={expression} result={result} history={history} isError={isError} />
-      {/* <HistoryPanel history={history} /> */}
-      <Keypad
-        onNumber={handleNumberInput}
-        onDecimal={handleDecimalInput}
-        onOperator={handleOperatorInput}
-        onEquals={handleEquals}
-        onClear={handleClear}
-        onBackspace={handleBackspace}
-      />
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
+        <button onClick={() => setMode('math')} disabled={mode === 'math'}>Calculator</button>
+        <button onClick={() => setMode('currency')} disabled={mode === 'currency'}>Exchange Rate</button>
+      </div>
+      <CalculatorLayout mode={mode} displayProps={displayProps} keypadProps={keypadProps} />
     </div>
   );
 }

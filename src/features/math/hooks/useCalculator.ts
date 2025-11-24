@@ -79,7 +79,7 @@ export function useCalculator() {
   const expression = useMemo(() => {
     if (state.operator && state.firstOperand !== null) {
       return state.shouldResetInput
-        ? state.firstOperand
+        ? `${state.firstOperand}${state.operator}` 
         : `${state.firstOperand}${state.operator}${state.currentInput}`;
     }
     return state.currentInput;
@@ -101,6 +101,7 @@ export function useCalculator() {
         shouldResetInput: false,
         isError: false,
         result: null,
+        lastEntry: null, // Clear lastEntry when starting new input
       };
     });
   };
@@ -115,6 +116,7 @@ export function useCalculator() {
         currentInput: nextInput,
         shouldResetInput: false,
         result: null,
+        lastEntry: null, // Clear lastEntry
       };
     });
   };
@@ -129,24 +131,28 @@ export function useCalculator() {
         return { ...prev, operator: incomingOperator };
       }
 
+      // Chain operations: compute the result and continue with new operator
       if (prev.operator && prev.firstOperand !== null && !prev.shouldResetInput) {
         const { display, isError } = computeOperation(prev.firstOperand, prev.currentInput, prev.operator);
+        const entry = `${prev.firstOperand}${prev.operator}${prev.currentInput}=${display}`;
         return {
           currentInput: display,
           firstOperand: display,
           operator: incomingOperator,
           result: display,
-          lastEntry: null,
+          lastEntry: entry,
           isError,
           shouldResetInput: true,
         };
       }
 
+      // Start new operation
       return {
         ...prev,
         firstOperand: prev.currentInput,
         operator: incomingOperator,
         shouldResetInput: true,
+        lastEntry: null, // Clear lastEntry when starting new operation
       };
     });
   };
