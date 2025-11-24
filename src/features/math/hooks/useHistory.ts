@@ -1,28 +1,47 @@
-/* global localStorage */
 import { useCallback, useEffect, useState } from "react";
-import { postHistory, getHistory, deleteHistory } from "../../../services/historyService";
+import { deleteHistory, getHistory, postHistory } from "../../../services/historyService";
+
+export type HistoryEntryValue = string | number | null | undefined;
+
+export interface HistoryEntry {
+  operand1?: HistoryEntryValue;
+  operator?: HistoryEntryValue;
+  operand2?: HistoryEntryValue;
+  result?: HistoryEntryValue;
+}
+
+export type HistoryInput = string | HistoryEntry;
 
 // Utility to format a history entry
-function formatHistoryEntry({ operand1, operator, operand2, result }) {
+function formatHistoryEntry({ operand1, operator, operand2, result }: HistoryEntry): string {
   // Helper to sanitize and format numbers/strings
-  const safe = (val, fallback = "—") => {
+  const safe = (val: HistoryEntryValue, fallback = "—") => {
     if (val === undefined || val === null || val === "undefined" || val === "null") return fallback;
     if (typeof val === "number" && !Number.isFinite(val)) return fallback;
     if (typeof val === "string") return val.trim();
     return String(val);
   };
+
   const op1 = safe(operand1, "");
   const op = safe(operator, "");
   const op2 = safe(operand2, "");
-  let res = result;
+  let res: HistoryEntryValue = result;
+
   if (res === undefined || res === null || res === "undefined" || res === "null") res = "—";
   else if (typeof res === "number" && !Number.isFinite(res)) res = "—";
   else if (typeof res === "string") res = res.trim();
+
   return `${op1}${op}${op2}=${res}`;
 }
 
-export default function useHistory() {
-  const [history, setHistory] = useState(() => {
+interface UseHistoryResult {
+  history: string[];
+  addHistoryEntry: (entry: HistoryInput) => Promise<void>;
+  clearHistory: () => Promise<void>;
+}
+
+export default function useHistory(): UseHistoryResult {
+  const [history, setHistory] = useState<string[]>(() => {
     // Start with localStorage for SSR/fast load, then hydrate from API
     try {
       if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
@@ -49,7 +68,7 @@ export default function useHistory() {
         const apiHistory = await getHistory();
         if (mounted && Array.isArray(apiHistory)) {
           // Use operation/result fields to match local format
-          setHistory(apiHistory.map((h) => h.operation || h.result || ""));
+          setHistory(apiHistory.map((h) => String(h.operation || h.result || "")));
         }
       } catch {
         // Ignore API errors, keep local state
@@ -73,7 +92,7 @@ export default function useHistory() {
   }, [history]);
 
   // Add a new entry (and POST to API)
-  const addHistoryEntry = useCallback(async (entryObj) => {
+  const addHistoryEntry = useCallback(async (entryObj: HistoryInput) => {
     const entry = typeof entryObj === "string" ? entryObj : formatHistoryEntry(entryObj);
     setHistory((prev) => [...prev, entry]);
     try {

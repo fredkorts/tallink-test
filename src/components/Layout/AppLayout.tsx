@@ -14,7 +14,6 @@ interface AppLayoutProps {
 }
 
 function AppLayout({ mode, onModeChange, children }: AppLayoutProps) {
-  const modeLabel = MODE_LABELS[mode] || mode;
 
   return (
     <div className={`${styles["appLayout"]} app-layout`}>
@@ -24,10 +23,6 @@ function AppLayout({ mode, onModeChange, children }: AppLayoutProps) {
       </header>
 
       <main className={styles["content"]}>{children}</main>
-
-      <footer className={styles["footer"]}>
-        <p className={styles["footerText"]}>Mode: {modeLabel}</p>
-      </footer>
     </div>
   );
 }

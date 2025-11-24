@@ -27,9 +27,8 @@ function ModeToggle({ mode, onModeChange }: ModeToggleProps) {
         aria-label={`Switch to ${isMathMode ? "Currency" : "Math"} mode`}
       >
         <span className={`${styles["toggleOption"]} ${isMathMode ? styles["active"] : ""}`}>Math</span>
-        <span className={`${styles["toggleOption"]} ${!isMathMode ? styles["active"] : ""}`}>
-          Currency
-        </span>
+        <span className={`${styles["toggleOption"]} ${!isMathMode ? styles["active"] : ""}`}>Currency</span>
+        
         <span className={styles["toggleSlider"]} data-active={isMathMode ? "math" : "currency"} />
       </button>
     </div>
