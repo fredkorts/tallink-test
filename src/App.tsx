@@ -7,8 +7,8 @@ function App() {
   const [mode, setMode] = useState<CalculatorMode>(CALCULATOR_MODES.MATH);
 
   return (
-    <AppLayout mode={mode} onModeChange={setMode}>
-      <MathCalculator mode={mode} />
+    <AppLayout>
+      <MathCalculator mode={mode} onModeChange={setMode} />
     </AppLayout>
   );
 }

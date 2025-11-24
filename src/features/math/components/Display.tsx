@@ -1,7 +1,12 @@
-import { SPECIAL_VALUES } from "../../../utils/constants";
+import { CALCULATOR_MODES, type CalculatorMode, SPECIAL_VALUES } from "../../../utils/constants";
 import styles from "./Display.module.css";
 
-type MathDisplayProps = {
+type BaseDisplayProps = {
+  mode: CalculatorMode;
+  onModeChange: (mode: CalculatorMode) => void;
+};
+
+type MathDisplayProps = BaseDisplayProps & {
   mode: "math";
   expression: string;
   result: string | null;
@@ -9,7 +14,7 @@ type MathDisplayProps = {
   isError: boolean;
 };
 
-type CurrencyDisplayProps = {
+type CurrencyDisplayProps = BaseDisplayProps & {
   mode: "currency";
   fromCurrency: string;
   toCurrency: string;
@@ -23,9 +28,39 @@ type CurrencyDisplayProps = {
   outputValue: string;
 };
 
-type DisplayProps = MathDisplayProps | CurrencyDisplayProps;
+export type DisplayProps = MathDisplayProps | CurrencyDisplayProps;
 
 export default function Display(props: DisplayProps) {
+  const renderModeToggle = () => (
+    <div className={styles["modeToggle"]}>
+      {props.mode === CALCULATOR_MODES.MATH ? (
+        <span className={styles["modeToggleLabel"]}>Calculator</span>
+      ) : (
+        <button
+          type="button"
+          className={styles["modeToggleButton"]}
+          onClick={() => props.onModeChange(CALCULATOR_MODES.MATH)}
+        >
+          Calculator
+        </button>
+      )}
+
+      <span className={styles["modeToggleDivider"]}>|</span>
+
+      {props.mode === CALCULATOR_MODES.CURRENCY ? (
+        <span className={styles["modeToggleLabel"]}>Exchange Rate</span>
+      ) : (
+        <button
+          type="button"
+          className={styles["modeToggleButton"]}
+          onClick={() => props.onModeChange(CALCULATOR_MODES.CURRENCY)}
+        >
+          Exchange Rate
+        </button>
+      )}
+    </div>
+  );
+
   if (props.mode === "currency") {
     const {
       fromCurrency,
@@ -47,6 +82,7 @@ export default function Display(props: DisplayProps) {
 
     return (
       <div className={styles["display"]} aria-live="polite">
+        {renderModeToggle()}
         <div className={styles["statusRow"]}>
           {ratesLoading && <span className={styles["statusMuted"]}>Loading rates…</span>}
           {ratesError && <span className={styles["statusError"]}>{ratesError}</span>}
@@ -99,6 +135,7 @@ export default function Display(props: DisplayProps) {
   const visibleValue = props.isError ? SPECIAL_VALUES.NAN : props.result ?? props.expression;
   return (
     <div className={styles["display"]} aria-live="polite">
+      {renderModeToggle()}
       <div className={styles["history"]}>
         {props.history.length > 0 ? (
           props.history.slice(-3).map((entry, i) => <div key={i}>{entry}</div>)
