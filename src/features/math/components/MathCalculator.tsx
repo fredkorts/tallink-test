@@ -26,7 +26,7 @@ export default function MathCalculator() {
     if (lastEntry) {
       addHistoryEntry(lastEntry);
     }
-  }, [addHistoryEntry, lastEntry, result]);
+  }, [addHistoryEntry, lastEntry]);
 
   useEffect(() => {
     const handleKey = (event: KeyboardEvent) => {
