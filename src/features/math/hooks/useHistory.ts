@@ -1,16 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { deleteHistory, getHistory, postHistory } from "../../../services/historyService";
-
-export type HistoryEntryValue = string | number | null | undefined;
-
-export interface HistoryEntry {
-  operand1?: HistoryEntryValue;
-  operator?: HistoryEntryValue;
-  operand2?: HistoryEntryValue;
-  result?: HistoryEntryValue;
-}
-
-export type HistoryInput = string | HistoryEntry;
+import type { HistoryEntry, HistoryEntryValue, HistoryInput } from "../types/calculator.types";
 
 // Utility to format a history entry
 function formatHistoryEntry({ operand1, operator, operand2, result }: HistoryEntry): string {

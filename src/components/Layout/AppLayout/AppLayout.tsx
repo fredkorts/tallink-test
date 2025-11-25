@@ -13,10 +13,6 @@ function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <div className={`container ${styles["appLayout"]}`}>
-      <header className={styles["header"]}>
-        <h1 className={styles["title"]}>Calculator</h1>
-      </header>
-
       <main className={styles["content"]}>
         <div className={styles["contentCard"]}>{children}</div>
       </main>

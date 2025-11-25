@@ -1,0 +1,19 @@
+.mathDisplay {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.history {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    align-items: flex-end;
+    font-size: 1rem;
+}
+
+.result {
+    font-size: 2rem;
+    text-align: right;
+    word-break: break-all;
+}

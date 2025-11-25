@@ -1,0 +1,35 @@
+.modeToggle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 200;
+    margin-bottom: auto;
+    color: var(--color-text-muted);
+}
+
+.modeToggleLabel {
+    color: var(--color-text);
+    font-size: 12px;
+}
+
+.modeToggleDivider {
+    color: var(--color-text-muted);
+}
+
+.modeToggleButton {
+    background: none;
+    border: none;
+    color: var(--color-primary);
+    cursor: pointer;
+    padding: 0;
+    font: inherit;
+    font-size: 12px;
+    text-decoration: underline;
+    text-underline-offset: 5px;
+}
+
+.modeToggleButton:hover,
+.modeToggleButton:focus-visible {
+    text-decoration: underline;
+}

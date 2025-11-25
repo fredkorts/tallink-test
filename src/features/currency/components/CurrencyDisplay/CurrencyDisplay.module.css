@@ -1,0 +1,116 @@
+.currencyDisplay {
+    display: flex;
+    flex-direction: column;
+}
+
+.statusRow {
+    min-height: 1.25rem;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
+.statusError {
+    color: var(--color-warning);
+}
+
+.statusMuted {
+    color: var(--color-text-muted);
+}
+
+.currencyRow {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    min-width: 0;
+}
+
+.currencySelect {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    border: none;
+    background: transparent;
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: var(--color-text);
+    cursor: pointer;
+    padding: 0;
+    outline: none;
+    flex-shrink: 0;
+    min-width: fit-content;
+}
+
+.currencySelect:hover {
+    text-decoration: underline;
+    color: var(--color-primary);
+}
+
+.currencySelect:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 4px;
+    border-radius: 2px;
+}
+
+.currencySelect:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.chevron {
+    color: var(--color-text-muted);
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.currencyInput {
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--color-primary);
+    text-align: right;
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+}
+
+.currencyInput:focus-visible {
+    color: var(--color-primary);
+}
+
+.currencyInput:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.currencyOutput {
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--color-text);
+    text-align: right;
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-height: auto;
+}
+
+.timestamp {
+    text-align: center;
+    font-size: 0.65rem;
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+}

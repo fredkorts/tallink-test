@@ -9,7 +9,10 @@ export function formatResult(value: number | null): string {
   if (value === null) return SPECIAL_VALUES.NAN;
   if (Number.isNaN(value)) return SPECIAL_VALUES.NAN;
   if (!Number.isFinite(value)) return value > 0 ? SPECIAL_VALUES.INFINITY : SPECIAL_VALUES.NEGATIVE_INFINITY;
-  return value.toString();
+
+  // Round to max 6 decimal places to avoid floating point errors and long strings
+  // parseFloat removes trailing zeros automatically
+  return parseFloat(value.toFixed(6)).toString();
 }
 
 export function formatInput(input: string): string {

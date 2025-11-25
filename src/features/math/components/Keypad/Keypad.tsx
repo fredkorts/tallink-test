@@ -1,16 +1,6 @@
-import { CALCULATOR_MODES, OPERATIONS, type CalculatorMode } from "../../../../utils/constants";
-import type { Operator } from "../../hooks/useCalculator";
+import { CALCULATOR_MODES, OPERATIONS } from "../../../../utils/constants";
+import type { KeypadProps } from "../../types/calculator.types";
 import styles from "./Keypad.module.css";
-
-export interface KeypadProps {
-  onNumber: (digit: string) => void;
-  onDecimal: () => void;
-  onOperator: (op: Operator) => void;
-  onEquals: () => void;
-  onClear: () => void;
-  onBackspace: () => void;
-  mode?: CalculatorMode;
-}
 
 type KeyButton = {
   label: string;
