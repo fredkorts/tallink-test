@@ -1,7 +1,22 @@
 import { useCallback, useEffect, useState } from "react";
 import type { UseCurrencyRatesResult } from "../../../hooks/useCurrencyRates";
-import type { UseCurrencyConverterResult } from "../types/currency.types";
-import { sanitizeCurrencyInput } from "../utils/currencyHelpers";
+import { sanitizeCurrencyInput } from "../utils/helpers";
+
+export interface UseCurrencyConverterResult {
+    fromCurrency: string;
+    toCurrency: string;
+    inputValue: string;
+    outputValue: string;
+    handlers: {
+        onFromCurrencyChange: (code: string) => void;
+        onToCurrencyChange: (code: string) => void;
+        onInputValueChange: (value: string) => void;
+        onNumber: (digit: string) => void;
+        onDecimal: () => void;
+        onClear: () => void;
+        onBackspace: () => void;
+    };
+}
 
 /**
  * Custom hook for managing currency converter state and logic

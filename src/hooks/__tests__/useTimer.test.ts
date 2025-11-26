@@ -1,4 +1,4 @@
-import { renderHook } from "@testing-library/react";
+import { renderHook, act } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { useTimer } from "../useTimer";
 
@@ -25,8 +25,9 @@ describe("useTimer", () => {
         const initialTime = result.current;
 
         // Advance time by 1 minute and run pending timers
-        vi.advanceTimersByTime(60000);
-        vi.runOnlyPendingTimers();
+        act(() => {
+            vi.advanceTimersByTime(60000);
+        });
 
         expect(result.current).toBeGreaterThan(initialTime);
     });
@@ -38,8 +39,9 @@ describe("useTimer", () => {
         const initialTime = result.current;
 
         // Advance time by 5 seconds and run pending timers
-        vi.advanceTimersByTime(customInterval);
-        vi.runOnlyPendingTimers();
+        act(() => {
+            vi.advanceTimersByTime(customInterval);
+        });
 
         expect(result.current).toBeGreaterThan(initialTime);
     });
@@ -50,7 +52,9 @@ describe("useTimer", () => {
         const initialTime = result.current;
 
         // Advance time by 30 seconds (less than interval)
-        vi.advanceTimersByTime(30000);
+        act(() => {
+            vi.advanceTimersByTime(30000);
+        });
 
         expect(result.current).toBe(initialTime);
     });
@@ -71,16 +75,19 @@ describe("useTimer", () => {
         const times: number[] = [result.current];
 
         // Advance and capture 3 updates
-        vi.advanceTimersByTime(10000);
-        vi.runOnlyPendingTimers();
+        act(() => {
+            vi.advanceTimersByTime(10000);
+        });
         times.push(result.current);
 
-        vi.advanceTimersByTime(10000);
-        vi.runOnlyPendingTimers();
+        act(() => {
+            vi.advanceTimersByTime(10000);
+        });
         times.push(result.current);
 
-        vi.advanceTimersByTime(10000);
-        vi.runOnlyPendingTimers();
+        act(() => {
+            vi.advanceTimersByTime(10000);
+        });
         times.push(result.current);
 
         // All timestamps should be different and increasing

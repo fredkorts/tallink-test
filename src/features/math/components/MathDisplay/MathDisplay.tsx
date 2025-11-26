@@ -1,6 +1,12 @@
 import { SPECIAL_VALUES } from "../../../../utils/constants";
-import type { MathDisplayProps } from "../../types/calculator.types";
 import styles from "./MathDisplay.module.css";
+
+export interface MathDisplayProps {
+    expression: string;
+    result: string | null;
+    history: string[];
+    isError: boolean;
+}
 
 /**
  * Display component for Math Calculator mode

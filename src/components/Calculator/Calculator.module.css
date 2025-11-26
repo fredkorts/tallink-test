@@ -1,0 +1,12 @@
+.calculator {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.displayArea {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
