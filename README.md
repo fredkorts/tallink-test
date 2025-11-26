@@ -6,6 +6,10 @@ A modern, dual-mode calculator application built with React and TypeScript. Swit
 
 This application was built to provide Margaret, our accountant, with a reliable digital calculator after she misplaced her physical ones. The app features two distinct modes:
 
+## 🚀 Live Demo
+
+[View the app on Vercel](https://tallink-test.vercel.app/)
+
 - **Math Mode**: Perform standard arithmetic operations plus a unique prime number calculation
 - **Currency Mode**: Convert between multiple currencies with live exchange rates
 
@@ -17,12 +21,12 @@ The project emphasizes clean architecture, type safety, and a polished user expe
 
 ### Core Technologies
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| **React** | 18.2.0 | UI framework for building component-based interfaces |
-| **TypeScript** | 5.x | Type safety and enhanced developer experience |
-| **Vite** | 5.2.0 | Lightning-fast build tool and dev server with HMR |
-| **MirageJS** | 0.1.48 | Mock API server for development and testing |
+| Technology     | Version | Purpose                                              |
+| -------------- | ------- | ---------------------------------------------------- |
+| **React**      | 18.2.0  | UI framework for building component-based interfaces |
+| **TypeScript** | 5.x     | Type safety and enhanced developer experience        |
+| **Vite**       | 5.2.0   | Lightning-fast build tool and dev server with HMR    |
+| **MirageJS**   | 0.1.48  | Mock API server for development and testing          |
 
 ### Development & Testing
 
@@ -54,6 +58,7 @@ The mock server is configured in [`src/mirage.js`](file:///Users/fredkorts/Docum
 Stores and retrieves calculation history for the math mode.
 
 **Endpoints:**
+
 - `GET /api/history` - Retrieve all calculation records
 - `POST /api/history` - Store a new calculation
   ```json
@@ -66,6 +71,7 @@ Stores and retrieves calculation history for the math mode.
 - `DELETE /api/history` - Clear all history
 
 **Implementation:**
+
 - History is persisted in both localStorage and the mock API
 - The [`historyService.ts`](file:///Users/fredkorts/Documents/Development/Homework/tallink-test/src/services/historyService.ts) handles all API interactions
 - Requests are automatically mocked during development
@@ -76,9 +82,11 @@ Stores and retrieves calculation history for the math mode.
 Provides current exchange rates for currency conversion.
 
 **Endpoint:**
+
 - `GET /api/rates` - Retrieve exchange rates for supported currencies
 
 **Response:**
+
 ```json
 {
   "USD": 1.0,
@@ -91,6 +99,7 @@ Provides current exchange rates for currency conversion.
 ```
 
 **Implementation:**
+
 - Rates are fetched via [`ratesService.ts`](file:///Users/fredkorts/Documents/Development/Homework/tallink-test/src/services/ratesService.ts)
 - The mock server simulates a 6-second delay to test loading states
 - Rates are cached with timestamps to show "last updated" information
@@ -149,6 +158,7 @@ features/math/
 ```
 
 **Benefits:**
+
 - **Components** focus purely on presentation
 - **Hooks** encapsulate complex business logic and state management
 - **Utils** provide pure, testable functions
@@ -175,6 +185,7 @@ services/            # Centralized API layer
 ```
 
 **Benefits:**
+
 - Avoids code duplication
 - Provides consistent patterns across features
 - Makes it easy to update shared functionality in one place
@@ -191,6 +202,7 @@ MathDisplay/
 ```
 
 **Benefits:**
+
 - Styles are scoped to prevent naming conflicts
 - Easy to find and modify component-specific styles
 - Unused styles are removed when components are deleted
@@ -210,6 +222,7 @@ hooks/
 ```
 
 **Benefits:**
+
 - Easy to find tests for specific modules
 - Tests are more likely to be updated when code changes
 - Clear test coverage visibility
