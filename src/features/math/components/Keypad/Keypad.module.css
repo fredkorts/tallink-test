@@ -17,9 +17,3 @@
 .equals {
   grid-column: span 2;
 }
-
-@media (max-width: 640px) {
-  .row {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
