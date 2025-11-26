@@ -1,10 +1,13 @@
 import { CALCULATOR_MODES, OPERATIONS, type CalculatorMode } from "../../../../utils/constants";
 import type { Operator } from "../../hooks/useCalculator";
+import Button from "../../../../components/Common/Button/Button";
+import type { ButtonProps } from "../../../../components/Common/Button/Button";
 import styles from "./Keypad.module.css";
 
 type KeyButton = {
   label: string;
   ariaLabel?: string;
+  variant?: ButtonProps["variant"];
   className?: string;
   onClick: () => void;
 };
@@ -32,50 +35,51 @@ export default function Keypad({
 
   const createNumberButton = (digit: string): KeyButton => ({
     label: digit,
+    variant: "number",
     onClick: () => onNumber(digit),
   });
 
   const mathRows: KeyButton[][] = [
     [
-      { label: "C", ariaLabel: "Clear", className: styles["clear"], onClick: onClear },
-      { label: "⌫", ariaLabel: "Backspace", className: styles["backspace"], onClick: onBackspace },
-      { label: OPERATIONS.PRIME, ariaLabel: "Prime", className: styles["prime"], onClick: () => onOperator(OPERATIONS.PRIME) },
-      { label: OPERATIONS.DIVIDE, ariaLabel: "Divide", className: styles["operator"], onClick: () => onOperator(OPERATIONS.DIVIDE) },
+      { label: "C", ariaLabel: "Clear", variant: "clear", onClick: onClear },
+      { label: "⌫", ariaLabel: "Backspace", variant: "operator", onClick: onBackspace },
+      { label: OPERATIONS.PRIME, ariaLabel: "Prime", variant: "operator", onClick: () => onOperator(OPERATIONS.PRIME) },
+      { label: OPERATIONS.DIVIDE, ariaLabel: "Divide", variant: "operator", onClick: () => onOperator(OPERATIONS.DIVIDE) },
     ],
     [
       createNumberButton("7"),
       createNumberButton("8"),
       createNumberButton("9"),
-      { label: OPERATIONS.MULTIPLY, ariaLabel: "Multiply", className: styles["operator"], onClick: () => onOperator(OPERATIONS.MULTIPLY) },
+      { label: OPERATIONS.MULTIPLY, ariaLabel: "Multiply", variant: "operator", onClick: () => onOperator(OPERATIONS.MULTIPLY) },
     ],
     [
       createNumberButton("4"),
       createNumberButton("5"),
       createNumberButton("6"),
-      { label: OPERATIONS.SUBTRACT, ariaLabel: "Subtract", className: styles["operator"], onClick: () => onOperator(OPERATIONS.SUBTRACT) },
+      { label: OPERATIONS.SUBTRACT, ariaLabel: "Subtract", variant: "operator", onClick: () => onOperator(OPERATIONS.SUBTRACT) },
     ],
     [
       createNumberButton("1"),
       createNumberButton("2"),
       createNumberButton("3"),
-      { label: OPERATIONS.ADD, ariaLabel: "Add", className: styles["operator"], onClick: () => onOperator(OPERATIONS.ADD) },
+      { label: OPERATIONS.ADD, ariaLabel: "Add", variant: "operator", onClick: () => onOperator(OPERATIONS.ADD) },
     ],
     [
       createNumberButton("0"),
-      { label: ".", onClick: onDecimal },
-      { label: "=", ariaLabel: "Equals", className: styles["equals"], onClick: onEquals },
+      { label: ".", variant: "number", onClick: onDecimal },
+      { label: "=", ariaLabel: "Equals", variant: "equals", className: styles["equals"], onClick: onEquals },
     ],
   ];
 
   const currencyRows: KeyButton[][] = [
     [
-      { label: "C", ariaLabel: "Clear", className: styles["clear"], onClick: onClear },
-      { label: "⌫", ariaLabel: "Backspace", className: styles["backspace"], onClick: onBackspace },
+      { label: "C", ariaLabel: "Clear", variant: "clear", onClick: onClear },
+      { label: "⌫", ariaLabel: "Backspace", variant: "operator", onClick: onBackspace },
     ],
     [createNumberButton("7"), createNumberButton("8"), createNumberButton("9")],
     [createNumberButton("4"), createNumberButton("5"), createNumberButton("6")],
     [createNumberButton("1"), createNumberButton("2"), createNumberButton("3")],
-    [createNumberButton("00"), createNumberButton("0"), { label: ".", onClick: onDecimal }],
+    [createNumberButton("00"), createNumberButton("0"), { label: ".", variant: "number", onClick: onDecimal }],
   ];
 
   const rows = isMath ? mathRows : currencyRows;
@@ -84,20 +88,17 @@ export default function Keypad({
     <div className={styles["keypad"]}>
       {rows.map((row, rowIndex) => (
         <div className={styles["row"]} key={`row-${rowIndex}`}>
-          {row.map((button, index) => {
-            const buttonClass = button.className ? `${styles["button"]} ${button.className}` : styles["button"];
-            return (
-              <button
-                key={`${button.label}-${index}`}
-                className={buttonClass}
-                aria-label={button.ariaLabel}
-                onClick={button.onClick}
-                type="button"
-              >
-                {button.label}
-              </button>
-            );
-          })}
+          {row.map((button, index) => (
+            <Button
+              key={`${button.label}-${index}`}
+              variant={button.variant}
+              className={button.className}
+              onClick={button.onClick}
+              size="compact"
+            >
+              {button.label}
+            </Button>
+          ))}
         </div>
       ))}
     </div>

@@ -72,9 +72,6 @@ export function makeServer({ environment = "development" } = {}) {
         },
         { timing: 2000 }, // Reduced to 2 seconds for better dev experience
       );
-
-      // Optional: Add a passthrough for any unhandled routes
-      // This allows real API calls if Mirage doesn't handle them
       this.passthrough();
     },
   });

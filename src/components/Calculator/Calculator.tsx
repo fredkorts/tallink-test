@@ -12,105 +12,105 @@ import { useCurrencyConverter } from "../../features/currency/hooks/useCurrencyC
 import { CALCULATOR_MODES, type CalculatorMode } from "../../utils/constants";
 import styles from "./Calculator.module.css";
 
-const noop = () => {};
+const noop = () => { };
 
 /**
  * Unified Calculator component
  * Manages mode, math + currency logic, and renders a single view with conditional panels
  */
 export default function Calculator() {
-  const [mode, setMode] = useState<CalculatorMode>(CALCULATOR_MODES.MATH);
-  const isMathMode = mode === CALCULATOR_MODES.MATH;
+    const [mode, setMode] = useState<CalculatorMode>(CALCULATOR_MODES.MATH);
+    const isMathMode = mode === CALCULATOR_MODES.MATH;
 
-  // Math feature state
-  const {
-    expression,
-    result,
-    lastEntry,
-    isError,
-    handleNumberInput,
-    handleDecimalInput,
-    handleOperatorInput,
-    handleEquals,
-    handleClear,
-    handleBackspace,
-  } = useCalculator();
-  const { history, addHistoryEntry } = useHistory();
+    // Math feature state
+    const {
+        expression,
+        result,
+        lastEntry,
+        isError,
+        handleNumberInput,
+        handleDecimalInput,
+        handleOperatorInput,
+        handleEquals,
+        handleClear,
+        handleBackspace,
+    } = useCalculator();
+    const { history, addHistoryEntry } = useHistory();
 
-  useKeyboardHandler(
-    {
-      handleNumberInput,
-      handleDecimalInput,
-      handleOperatorInput,
-      handleEquals,
-      handleBackspace,
-      handleClear,
-    },
-    isMathMode,
-  );
+    useKeyboardHandler(
+        {
+            handleNumberInput,
+            handleDecimalInput,
+            handleOperatorInput,
+            handleEquals,
+            handleBackspace,
+            handleClear,
+        },
+        isMathMode,
+    );
 
-  useEffect(() => {
-    if (lastEntry) {
-      addHistoryEntry(lastEntry);
-    }
-  }, [addHistoryEntry, lastEntry]);
+    useEffect(() => {
+        if (lastEntry) {
+            addHistoryEntry(lastEntry);
+        }
+    }, [addHistoryEntry, lastEntry]);
 
-  // Currency feature state
-  const currencyRates = useCurrencyRates();
-  const converter = useCurrencyConverter(currencyRates);
+    // Currency feature state
+    const currencyRates = useCurrencyRates();
+    const converter = useCurrencyConverter(currencyRates);
 
-  const keypadProps = isMathMode
-    ? {
-        onNumber: handleNumberInput,
-        onDecimal: handleDecimalInput,
-        onOperator: handleOperatorInput,
-        onEquals: handleEquals,
-        onClear: handleClear,
-        onBackspace: handleBackspace,
-        mode,
-      }
-    : {
-        onNumber: converter.handlers.onNumber,
-        onDecimal: converter.handlers.onDecimal,
-        onOperator: noop,
-        onEquals: noop,
-        onClear: converter.handlers.onClear,
-        onBackspace: converter.handlers.onBackspace,
-        mode,
-      };
+    const keypadProps = isMathMode
+        ? {
+            onNumber: handleNumberInput,
+            onDecimal: handleDecimalInput,
+            onOperator: handleOperatorInput,
+            onEquals: handleEquals,
+            onClear: handleClear,
+            onBackspace: handleBackspace,
+            mode,
+        }
+        : {
+            onNumber: converter.handlers.onNumber,
+            onDecimal: converter.handlers.onDecimal,
+            onOperator: noop,
+            onEquals: noop,
+            onClear: converter.handlers.onClear,
+            onBackspace: converter.handlers.onBackspace,
+            mode,
+        };
 
-  return (
-    <AppLayout>
-      <div className={styles.calculator}>
-        <div className={styles.displayArea} aria-live="polite">
-          <ModeToggle mode={mode} onModeChange={setMode} />
+    return (
+        <AppLayout>
+            <div className={styles["calculator"]}>
+                <div className={styles["displayArea"]} aria-live="polite">
+                    <ModeToggle mode={mode} onModeChange={setMode} />
 
-          {isMathMode ? (
-            <MathDisplay
-              expression={expression}
-              result={result}
-              history={history}
-              isError={isError}
-            />
-          ) : (
-            <CurrencyDisplay
-              fromCurrency={converter.fromCurrency}
-              toCurrency={converter.toCurrency}
-              currencies={currencyRates.currencies}
-              ratesLoading={currencyRates.loading}
-              ratesError={currencyRates.error}
-              onFromCurrencyChange={converter.handlers.onFromCurrencyChange}
-              onToCurrencyChange={converter.handlers.onToCurrencyChange}
-              inputValue={converter.inputValue}
-              onInputValueChange={converter.handlers.onInputValueChange}
-              outputValue={converter.outputValue}
-              timestamp={currencyRates.timestamp}
-            />
-          )}
-        </div>
+                    {isMathMode ? (
+                        <MathDisplay
+                            expression={expression}
+                            result={result}
+                            history={history}
+                            isError={isError}
+                        />
+                    ) : (
+                        <CurrencyDisplay
+                            fromCurrency={converter.fromCurrency}
+                            toCurrency={converter.toCurrency}
+                            currencies={currencyRates.currencies}
+                            ratesLoading={currencyRates.loading}
+                            ratesError={currencyRates.error}
+                            onFromCurrencyChange={converter.handlers.onFromCurrencyChange}
+                            onToCurrencyChange={converter.handlers.onToCurrencyChange}
+                            inputValue={converter.inputValue}
+                            onInputValueChange={converter.handlers.onInputValueChange}
+                            outputValue={converter.outputValue}
+                            timestamp={currencyRates.timestamp}
+                        />
+                    )}
+                </div>
 
-        <Keypad {...keypadProps} />
-      </div>
-    </AppLayout>
-  );
+                <Keypad {...keypadProps} />
+            </div>
+        </AppLayout>
+    );
 }

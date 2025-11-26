@@ -1,59 +1,412 @@
-# 🧮 Calculator
-Our accountant Margaret has misplaced her calculators, and we need to help her promptly by creating a "React Calculator".
+# 🧮 Calculator & Currency Converter
 
-## 🙋‍♀️ General
+A modern, dual-mode calculator application built with React and TypeScript. Switch seamlessly between a full-featured mathematical calculator and a real-time currency converter.
 
-- Follow the [Figma designs](https://www.figma.com/file/gqjeD7VfneerS5ssLPzvb9/Calculator-and-currency-exchange-app?type=design&node-id=2-251&mode=design&t=MVvYb9hVTExx1pYJ-11) as closely as possible.
-- The calculator supports two modes: math and currency. The math mode is opened by default.
+## 📋 Project Overview
 
-## ➗ Math
+This application was built to provide Margaret, our accountant, with a reliable digital calculator after she misplaced her physical ones. The app features two distinct modes:
 
-test
+- **Math Mode**: Perform standard arithmetic operations plus a unique prime number calculation
+- **Currency Mode**: Convert between multiple currencies with live exchange rates
 
-- Users can enter up to 10 digits for numbers (both integers and floats) by clicking on the pad or hitting numbers on the keyboard.
-- Five operations are supported: addition, subtraction, division, multiplication, and "Max Prime Number" operation ("P" button). 
-- "C" button resets the input to "0" and resets current operation. 
-- Each operation should `POST` its operands, operation, and result to `/api/history`. Use local memory to temporarily store the history until the API endpoint is ready. Implement request mocking to easily enable real requests once the API is available. 
-- If operation is imposible, result should be shown as NaN. Division by zero should show result as "Infinity" (or you can use UTF's Infinity char - https://en.wikipedia.org/wiki/Infinity_symbol)
+The project emphasizes clean architecture, type safety, and a polished user experience with keyboard support, persistent history, and responsive design.
 
-### How to show math operations
+---
 
-Let's describe how to calculate 2 + 31:
+## 🛠️ Tech Stack
 
-* User presses "2" ➡ display shows "2"
-* User presses "+" ➡ display shows "2+"
-* User presses "3" ➡ display shows "2+3"
-* User presses "1" ➡ display shows "2+31"
-* User presses "=" ➡ display shows "33", request to `/api/history` is done. History gets a new record to the bottom: "2+31=33". 
+### Core Technologies
 
-User continues to use our Calculator and wants to know the maximum prime number of "1" and "5"
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| **React** | 18.2.0 | UI framework for building component-based interfaces |
+| **TypeScript** | 5.x | Type safety and enhanced developer experience |
+| **Vite** | 5.2.0 | Lightning-fast build tool and dev server with HMR |
+| **MirageJS** | 0.1.48 | Mock API server for development and testing |
 
-* User presses "1" ➡ display shows "1" ("33" from previous operation is cleaned from displaay"
-* User presses "P" ➡ display shows "1P"
-* User presses "5" ➡ display shows "1P5"
-* User presses "=" ➡ display shows "5", request to `/api/history` is done. History gets a new record to the bottom: "1P5=5". 
+### Development & Testing
 
-### Max prime number
+- **Vitest** (4.0.13): Unit testing framework with React Testing Library
+- **ESLint** (9.39.1): Code linting with React-specific rules
+- **Prettier** (3.2.5): Consistent code formatting
+- **Husky** (9.1.7): Git hooks for pre-commit quality checks
+- **TypeScript** (5.9.3): Static type checking
 
-Button "P" calculates the maximum Prime number of two provided numbers. For example:
+### Build Configuration
 
-* 3 P 13 = 13
-* 20 P 25 = 23
-* 20 P 19 = NaN
+- **Module System**: ES Modules
+- **JSX Transform**: React 18 automatic runtime
+- **CSS Strategy**: CSS Modules for scoped component styles
+- **Package Manager**: npm
 
-## 💸 Currency
+---
 
-- Currency rates are available at `/api/rates`.
-- Users can choose both currencies, which are native Select elements.
-- Users can enter a value for the first currency, and the second currency is calculated based on the rates upon each change (value for the first currency or any currency).
-- Rates are downloaded upon each tab opening, and users can see how much time has passed since the last update and force an update by clicking the "reload" icon.
+## 🌐 API Usage
 
-## 👩‍💻 Development
+The application uses MirageJS to mock API endpoints during development, making it easy to switch to real endpoints when the backend is ready.
 
-- While this project provides a solid foundation and can be used as a scaffold, if any aspect of the desired UI behavior is ambiguous, the developer is empowered to apply their expertise and implement the optimal user experience approach. The developer is also empowered to leverage any third-party libraries or frameworks they deem necessary to accomplish the desired user interface and user experience objectives effectively and efficiently.
-- MirageJS is used for mocking the server; see mirage.js for API details.
-- When finished, the app should be runnable via `npm run dev` and deployable via `npm run build`.
+### Mock Server Setup
 
-## 🔬 Tests
+The mock server is configured in [`src/mirage.js`](file:///Users/fredkorts/Documents/Development/Homework/tallink-test/src/mirage.js) and provides two main endpoints:
 
-- You're encouraged to implement unit tests to ensure the application's robustness and maintainability.
+#### 1. History API (`/api/history`)
+
+Stores and retrieves calculation history for the math mode.
+
+**Endpoints:**
+- `GET /api/history` - Retrieve all calculation records
+- `POST /api/history` - Store a new calculation
+  ```json
+  {
+    "expression": "2+3",
+    "result": "5",
+    "timestamp": 1732618800000
+  }
+  ```
+- `DELETE /api/history` - Clear all history
+
+**Implementation:**
+- History is persisted in both localStorage and the mock API
+- The [`historyService.ts`](file:///Users/fredkorts/Documents/Development/Homework/tallink-test/src/services/historyService.ts) handles all API interactions
+- Requests are automatically mocked during development
+- To enable real API calls, simply update the service configuration
+
+#### 2. Exchange Rates API (`/api/rates`)
+
+Provides current exchange rates for currency conversion.
+
+**Endpoint:**
+- `GET /api/rates` - Retrieve exchange rates for supported currencies
+
+**Response:**
+```json
+{
+  "USD": 1.0,
+  "EUR": 0.85,
+  "AUD": 1.35,
+  "CAD": 1.25,
+  "JPY": 110.0,
+  "timestamp": 1732618800000
+}
+```
+
+**Implementation:**
+- Rates are fetched via [`ratesService.ts`](file:///Users/fredkorts/Documents/Development/Homework/tallink-test/src/services/ratesService.ts)
+- The mock server simulates a 6-second delay to test loading states
+- Rates are cached with timestamps to show "last updated" information
+- The [`useCurrencyRates`](file:///Users/fredkorts/Documents/Development/Homework/tallink-test/src/hooks/useCurrencyRates.ts) hook manages fetching and refresh logic
+
+### Switching to Real APIs
+
+To use real backend endpoints:
+
+1. Update the base URL in your service files
+2. Remove or disable the MirageJS server initialization in [`main.tsx`](file:///Users/fredkorts/Documents/Development/Homework/tallink-test/src/main.tsx)
+3. Ensure CORS is properly configured on your backend
+
+---
+
+## 📁 Folder Structure
+
+The project follows a **feature-based architecture** that promotes scalability, maintainability, and clear separation of concerns.
+
+### High-Level Structure
+
+```
+src/
+├── features/          # Feature modules (math, currency)
+├── components/        # Shared/reusable components
+├── hooks/            # Global custom hooks
+├── services/         # API service layer
+├── utils/            # Utility functions and constants
+└── styles/           # Global styles and CSS variables
+```
+
+### Why This Organization?
+
+#### 1. **Feature-Based Architecture**
+
+Each feature (`math`, `currency`) is self-contained with its own components, hooks, and utilities. This approach:
+
+- **Scales well**: New features can be added without touching existing code
+- **Improves discoverability**: Everything related to a feature lives in one place
+- **Enables code splitting**: Features can be lazy-loaded if needed
+- **Facilitates team collaboration**: Different developers can work on different features independently
+
+#### 2. **Separation of Concerns**
+
+```
+features/math/
+├── components/        # UI components specific to math mode
+│   ├── MathDisplay/
+│   └── Keypad/
+├── hooks/            # Business logic for math operations
+│   ├── useCalculator.ts
+│   ├── useHistory.ts
+│   └── useKeyboardHandler.ts
+└── utils/            # Math-specific utilities
+    └── helpers.ts    # Arithmetic, validation, prime number logic
+```
+
+**Benefits:**
+- **Components** focus purely on presentation
+- **Hooks** encapsulate complex business logic and state management
+- **Utils** provide pure, testable functions
+- Each layer can be tested independently
+
+#### 3. **Shared Resources**
+
+```
+components/           # Reusable across features
+├── Calculator/       # Main calculator container
+├── Common/          # Generic UI components (Button, IconButton, etc.)
+└── Layout/          # Layout components (AppLayout, Header)
+
+hooks/               # Global hooks used by multiple features
+├── useApi.ts        # Generic API hook
+├── useCurrencyRates.ts
+├── useLocalStorage.ts
+└── useTimer.ts
+
+services/            # Centralized API layer
+├── historyService.ts
+├── ratesService.ts
+└── types.ts         # Shared service types
+```
+
+**Benefits:**
+- Avoids code duplication
+- Provides consistent patterns across features
+- Makes it easy to update shared functionality in one place
+
+#### 4. **Co-located Styles**
+
+Each component has its own CSS Module file:
+
+```
+MathDisplay/
+├── MathDisplay.tsx
+├── MathDisplay.module.css
+└── index.ts
+```
+
+**Benefits:**
+- Styles are scoped to prevent naming conflicts
+- Easy to find and modify component-specific styles
+- Unused styles are removed when components are deleted
+- TypeScript integration provides autocomplete for class names
+
+#### 5. **Test Co-location**
+
+Tests live alongside the code they test:
+
+```
+hooks/
+├── useCalculator.ts
+├── useHistory.ts
+└── __tests__/
+    ├── useCalculator.test.ts
+    └── useHistory.test.ts
+```
+
+**Benefits:**
+- Easy to find tests for specific modules
+- Tests are more likely to be updated when code changes
+- Clear test coverage visibility
+
+### Complete Folder Structure
+
+```
+tallink-test/
+├── public/                    # Static assets
+│   └── calc-icon.svg
+│
+├── src/
+│   ├── main.tsx              # Application entry point
+│   ├── App.tsx               # Root component
+│   ├── index.css             # Global styles
+│   ├── mirage.js             # Mock API server configuration
+│   │
+│   ├── components/           # Shared components
+│   │   ├── Calculator/       # Main calculator container
+│   │   ├── Common/           # Reusable UI components
+│   │   │   ├── Button/
+│   │   │   ├── ErrorMessage/
+│   │   │   ├── IconButton/
+│   │   │   ├── LoadingSpinner/
+│   │   │   └── ModeToggle/
+│   │   └── Layout/           # Layout components
+│   │       ├── AppLayout/
+│   │       └── Header/
+│   │
+│   ├── features/             # Feature modules
+│   │   ├── math/
+│   │   │   ├── components/
+│   │   │   │   ├── Keypad/
+│   │   │   │   └── MathDisplay/
+│   │   │   ├── hooks/
+│   │   │   │   ├── useCalculator.ts
+│   │   │   │   ├── useHistory.ts
+│   │   │   │   ├── useKeyboardHandler.ts
+│   │   │   │   └── __tests__/
+│   │   │   └── utils/
+│   │   │       └── helpers.ts
+│   │   │
+│   │   └── currency/
+│   │       ├── components/
+│   │       │   └── CurrencyDisplay/
+│   │       ├── hooks/
+│   │       │   ├── useCurrencyConverter.ts
+│   │       │   └── __tests__/
+│   │       └── utils/
+│   │           └── helpers.ts
+│   │
+│   ├── hooks/                # Global hooks
+│   │   ├── useApi.ts
+│   │   ├── useCurrencyRates.ts
+│   │   ├── useLocalStorage.ts
+│   │   ├── useTimer.ts
+│   │   └── __tests__/
+│   │
+│   ├── services/             # API service layer
+│   │   ├── historyService.ts
+│   │   ├── ratesService.ts
+│   │   ├── types.ts
+│   │   └── __tests__/
+│   │
+│   ├── utils/                # Shared utilities
+│   │   ├── apiHelpers.ts
+│   │   ├── constants.ts
+│   │   └── timeFormatters.ts
+│   │
+│   └── styles/               # Global styles
+│       └── variables.css     # CSS custom properties
+│
+├── docs/                     # Project documentation (git-ignored)
+│   ├── HIERARCHY.md
+│   ├── PROJECT_STRUCTURE.md
+│   └── ...
+│
+├── package.json
+├── tsconfig.json
+├── vite.config.js
+├── vitest.config.js
+└── eslint.config.js
+```
+
+---
+
+## 🚀 Getting Started
+
+### Installation
+
+```bash
+npm install
+```
+
+### Development
+
+```bash
+npm run dev
+```
+
+The app will be available at `http://localhost:5173`
+
+### Build for Production
+
+```bash
+npm run build
+```
+
+### Preview Production Build
+
+```bash
+npm run preview
+```
+
+### Testing
+
+```bash
+npm test              # Run tests in watch mode
+npm run test:ui       # Run tests with UI
+npm run test:run      # Run tests once
+```
+
+### Code Quality
+
+```bash
+npm run lint          # Check for linting errors
+npm run lint:fix      # Auto-fix linting errors
+npm run typecheck     # Run TypeScript type checking
+```
+
+---
+
+## ✨ Features
+
+### Math Mode
+
+- ✅ Basic arithmetic operations: addition, subtraction, multiplication, division
+- ✅ Prime number operation: finds the maximum prime number ≤ the input
+- ✅ Expression display with live calculation preview
+- ✅ Calculation history with persistence
+- ✅ Full keyboard support (numbers, operators, Enter, Escape, Backspace)
+- ✅ Error handling (division by zero, invalid expressions)
+- ✅ Decimal number support
+
+### Currency Mode
+
+- ✅ Real-time currency conversion
+- ✅ Support for USD, EUR, AUD, CAD, JPY
+- ✅ Exchange rate display with "last updated" timestamp
+- ✅ Loading and error states
+- ✅ Automatic conversion on input change
+- ✅ Keypad input with decimal support
+
+### Shared Features
+
+- ✅ Seamless mode switching
+- ✅ Responsive, modern design
+- ✅ Accessible UI with ARIA labels
+- ✅ TypeScript type safety throughout
+- ✅ Comprehensive test coverage
+
+---
+
+## 🧪 Testing Strategy
+
+The project includes comprehensive tests for:
+
+- **Hooks**: Business logic testing (calculator operations, history management, currency conversion)
+- **Services**: API interaction testing with mocked responses
+- **Components**: UI behavior and user interaction testing
+- **Utilities**: Pure function testing for math operations and formatting
+
+Tests are co-located with their source files in `__tests__/` directories for easy discovery and maintenance.
+
+---
+
+## 📝 License
+
+MIT License - see [LICENSE](file:///Users/fredkorts/Documents/Development/Homework/tallink-test/LICENSE) file for details.
+
+---
+
+## 🤝 Contributing
+
+This project follows strict TypeScript and ESLint rules to maintain code quality. Pre-commit hooks ensure all code is properly formatted and linted before committing.
+
+### Code Style
+
+- **TypeScript**: Strict mode enabled with comprehensive type checking
+- **CSS**: CSS Modules with scoped styles
+- **Formatting**: Prettier with EditorConfig
+- **Naming Conventions**:
+  - Components: PascalCase (`MathDisplay.tsx`)
+  - Hooks: camelCase with `use` prefix (`useCalculator.ts`)
+  - Utilities: camelCase (`apiHelpers.ts`)
+  - CSS Modules: PascalCase with `.module.css` suffix
+
+---
+
+For detailed technical documentation, see [`docs/PROJECT_STRUCTURE.md`](file:///Users/fredkorts/Documents/Development/Homework/tallink-test/docs/PROJECT_STRUCTURE.md).
