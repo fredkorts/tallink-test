@@ -77,3 +77,7 @@ export const INITIAL_DISPLAY = "0";
 
 // Decimal point character
 export const DECIMAL_POINT = ".";
+
+// Cache configuration
+export const RATES_CACHE_KEY = "currency_rates_cache";
+export const RATES_CACHE_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds

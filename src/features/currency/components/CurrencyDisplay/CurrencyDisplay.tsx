@@ -1,6 +1,7 @@
 import { formatTimeAgo } from "../../../../utils/timeFormatters";
 import { getAvailableCurrencies } from "../../utils/currencyHelpers";
 import type { CurrencyDisplayProps } from "../../types/currency.types";
+import useTimer from "../../../../hooks/useTimer";
 import styles from "./CurrencyDisplay.module.css";
 
 /**
@@ -20,6 +21,9 @@ export default function CurrencyDisplay({
     outputValue,
     timestamp,
 }: CurrencyDisplayProps) {
+    // Trigger re-render every minute to update elapsed time
+    useTimer(60000);
+
     const currencyOptions = currencies || [];
     const fromOptions = getAvailableCurrencies(currencyOptions, fromCurrency, toCurrency);
     const toOptions = getAvailableCurrencies(currencyOptions, toCurrency, fromCurrency);

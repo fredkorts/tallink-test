@@ -222,16 +222,16 @@ This checklist outlines the step-by-step implementation plan for the React Calcu
 - [x] Handle loading state during fetch
 - [x] Handle error state if fetch fails
 - [x] Implement manual refresh function
-- [ ] Cache rates to avoid unnecessary refetches
-- [ ] Write tests for rate fetching and error handling
+- [x] Cache rates to avoid unnecessary refetches
+- [x] Write tests for rate fetching and error handling
 
 ### Rate Timer Hook
 
-- [ ] Create `features/currency/hooks/useRateTimer.js`
+- [x] Create features/currency/hooks/useTimer.ts (created in shared hooks)
 - [x] Track timestamp of last rate fetch
 - [x] Calculate elapsed time since last update
-- [ ] Update elapsed time display periodically (every minute)
-- [ ] Write tests for timer logic
+- [x] Update elapsed time display periodically (every minute)
+- [x] Write tests for timer logic
 
 ### Rates Integration
 
@@ -241,9 +241,9 @@ This checklist outlines the step-by-step implementation plan for the React Calcu
 - [x] Populate currency selectors with available currencies
 - [x] Show "Updated X ago" with useRateTimer
 - [x] Wire up refresh button to refetch rates
-- [ ] Test rate loading on mode open
-- [ ] Test manual refresh functionality
-- [ ] Test error handling (mock failed API call)
+- [x] Test rate loading on mode open
+- [x] Test manual refresh functionality
+- [x] Test error handling (mock failed API call)
 
 ---
 
@@ -257,7 +257,7 @@ This checklist outlines the step-by-step implementation plan for the React Calcu
 - [x] Update conversion on any input change (amount, source, or target currency)
 - [x] Handle decimal precision appropriately
 - [x] Handle edge cases: zero amount, missing rates, same currency selected
-- [ ] Write tests for conversion calculations
+- [x] Write tests for conversion calculations
 
 ### Conversion Integration
 
@@ -266,10 +266,10 @@ This checklist outlines the step-by-step implementation plan for the React Calcu
 - [x] Wire up source currency selector
 - [x] Wire up target currency selector
 - [x] Display converted amount in real-time
-- [ ] Test conversion accuracy
-- [ ] Test conversion updates on currency change
-- [ ] Test conversion updates on rate refresh
-- [ ] Test edge cases: 0 amount, same currency, missing rates
+- [x] Test conversion accuracy
+- [x] Test conversion updates on currency change
+- [x] Test conversion updates on rate refresh
+- [x] Test edge cases: 0 amount, same currency, missing rates
 
 ---
 
