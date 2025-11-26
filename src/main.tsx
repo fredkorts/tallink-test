@@ -4,10 +4,7 @@ import App from "./App";
 import "./index.css";
 import { makeServer } from "./mirage";
 
-// Only run Mirage in development
-if (import.meta.env.DEV) {
-  makeServer();
-}
+makeServer();
 
 const rootElement = document.getElementById("root");
 

@@ -88,8 +88,9 @@ tallink-test/
     ├── vite-env.d.ts          # Vite TypeScript definitions
     │
     ├── components/            # Shared components
-    │   ├── Calculator/
-    │   │   └── Calculator.tsx         # Main calculator wrapper
+    │   ├── Calculator/                # Unified calculator view
+    │   │   ├── Calculator.tsx
+    │   │   └── Calculator.module.css
     │   ├── Common/
     │   │   ├── Button/                # Reusable button component
     │   │   ├── ErrorMessage/          # Error display component
@@ -104,39 +105,29 @@ tallink-test/
     ├── features/              # Feature modules
     │   ├── math/
     │   │   ├── components/
-    │   │   │   ├── CalculatorLayout/  # Math mode layout
-    │   │   │   ├── Display/           # Legacy display (deprecated)
     │   │   │   ├── Keypad/            # Number/operator keypad
-    │   │   │   ├── MathCalculator/    # Main math calculator
     │   │   │   └── MathDisplay/       # Math expression display
     │   │   ├── hooks/
     │   │   │   ├── useCalculator.ts   # Calculator logic hook
     │   │   │   ├── useHistory.ts      # History management hook
     │   │   │   └── useKeyboardHandler.ts # Keyboard input hook
-    │   │   ├── types/
-    │   │   │   └── calculator.types.ts # Math feature types
-    │   │   ├── utils/
-    │   │   │   ├── calculatorHelpers.ts # Calculation utilities
-    │   │   │   ├── mathValidation.ts    # Input validation
-    │   │   │   └── primeHelpers.ts      # Prime number utilities
+    │   │   └── utils/
+    │   │       ├── helpers.ts          # Combined math helpers (ops, validation, formatting)
     │   │   └── __tests__/             # Math feature tests
     │   │
     │   └── currency/
     │       ├── components/
-    │       │   ├── CurrencyConverter/ # Main currency converter
     │       │   └── CurrencyDisplay/   # Currency input/output UI
     │       ├── hooks/
     │       │   └── useCurrencyConverter.ts # Currency logic hook
-    │       ├── types/
-    │       │   └── currency.types.ts  # Currency feature types
-    │       ├── utils/
-    │       │   └── currencyHelpers.ts # Currency utilities
-    │       └── __tests__/             # Currency feature tests
+    │       └── utils/
+    │           └── helpers.ts         # Currency utilities
     │
     ├── hooks/                 # Global hooks
     │   ├── useApi.ts          # Generic API hook
     │   ├── useCurrencyRates.ts # Exchange rates hook
     │   ├── useLocalStorage.ts  # localStorage hook
+    │   └── useTimer.ts         # Interval-based timer hook
     │   └── __tests__/          # Hook tests
     │
     ├── services/              # API service layer
@@ -152,8 +143,6 @@ tallink-test/
     │
     ├── styles/                # Global styles
     │   └── variables.css      # CSS custom properties (colors, spacing)
-    │
-    └── types/                 # Global TypeScript types
 ```
 
 ---
@@ -163,7 +152,7 @@ tallink-test/
 ### Shared Components (`/src/components`)
 
 #### Calculator Components
-- **`Calculator`**: Main calculator wrapper that manages mode state
+- **`Calculator`**: Unified calculator view that manages mode state and conditionally renders Math or Currency panels with a shared keypad.
 
 #### Common Components
 - **`Button`**: Reusable button with variants and states
@@ -182,20 +171,13 @@ tallink-test/
 ### Math Feature (`/src/features/math`)
 
 #### Components
-- **`MathCalculator`**: Main math calculator orchestrator
-  - Props: `mode`, `onModeChange`
-  - Manages calculator state, history, and keyboard handling
-  
 - **`MathDisplay`**: Expression and result display
   - Props: `expression`, `result`, `history`, `isError`
   - Shows current calculation, result, and recent history
-  
+
 - **`Keypad`**: Interactive number and operator buttons
   - Props: Handlers for numbers, operators, equals, clear, backspace
   - Adapts layout based on mode (math vs currency)
-  
-- **`CalculatorLayout`**: Layout wrapper for calculator components
-  - Composes display and keypad components
 
 #### Hooks
 - **`useCalculator`**: Core calculator logic
@@ -208,29 +190,16 @@ tallink-test/
   
 - **`useKeyboardHandler`**: Keyboard input support
   - Listens for number keys, operators, Enter, Escape, Backspace
-  - Can be enabled/disabled based on mode
-
-#### Types (`calculator.types.ts`)
-- `MathCalculatorProps`
-- `MathDisplayProps`
-- `KeypadProps`
-- `ModeChangeProps`
-- `HistoryEntry`, `HistoryEntryValue`, `HistoryInput`
+  - Enabled for math mode in the unified view
 
 #### Utilities
-- **`calculatorHelpers`**: Arithmetic operations, expression parsing
-- **`mathValidation`**: Input validation and sanitization
-- **`primeHelpers`**: Prime number calculation and caching
+- **`helpers.ts`**: Combined arithmetic operations, validation, formatting, and prime helpers
 
 ---
 
 ### Currency Feature (`/src/features/currency`)
 
 #### Components
-- **`CurrencyConverter`**: Main currency converter orchestrator
-  - Props: `mode`, `onModeChange`
-  - Manages currency state, rates, and conversion
-
 - **`CurrencyDisplay`**: Currency input/output UI
   - Props: Currencies, rates, loading/error states, handlers
   - Shows: Currency selectors, input/output fields, exchange rate timestamp
@@ -241,12 +210,8 @@ tallink-test/
   - Handles currency selection and value conversion
   - Returns: State values and event handlers
 
-#### Types (`currency.types.ts`)
-- `CurrencyDisplayProps`
-- `UseCurrencyConverterResult`
-
 #### Utilities
-- **`currencyHelpers`**: Currency filtering and formatting utilities
+- **`helpers.ts`**: Currency filtering, input sanitization, and formatting utilities
 
 ---
 
@@ -255,6 +220,7 @@ tallink-test/
 - **`useApi`**: Generic API hook with loading/error states
 - **`useCurrencyRates`**: Fetches and caches exchange rates
 - **`useLocalStorage`**: Sync state with localStorage
+- **`useTimer`**: Interval hook for re-rendering timestamped UI
 
 ---
 
@@ -409,9 +375,7 @@ npm run preview  # Preview production build
   - `utils/apiHelpers.ts`
   - `features/math/utils/primeHelpers.ts`
   
-- **Types**: camelCase with `.types.ts` suffix
-  - `features/math/types/calculator.types.ts`
-  - `services/types.ts`
+- **Types**: Co-located with modules (inline interfaces) and shared service types in `services/types.ts`
   
 - **Styles**: PascalCase with `.module.css` suffix
   - `Button.module.css`
@@ -422,9 +386,9 @@ npm run preview  # Preview production build
 ## TypeScript Usage
 
 ### Type Organization
-- Feature-specific types in `features/*/types/*.types.ts`
+- Feature-specific props and helper types live alongside their components/hooks
 - Service types in `services/types.ts`
-- Component props defined inline or in types file
+- Component props defined inline for readability
 - Hook return types defined inline
 
 ### Type Safety Benefits

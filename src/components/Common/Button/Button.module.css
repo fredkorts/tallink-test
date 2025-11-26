@@ -1,4 +1,5 @@
 .button {
+  position: relative;
   padding: 1rem 1.5rem;
   font-size: 1rem;
   font-weight: 600;
@@ -8,6 +9,7 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   outline: none;
   font-family: inherit;
+  overflow: hidden;
 }
 
 .button:hover:not(:disabled) {
@@ -60,4 +62,60 @@
   background-color: var(--color-accent);
   color: var(--color-accent-contrast);
   font-size: 1.1rem;
+}
+
+/* Compact size for keypad buttons */
+.button--compact {
+  padding: 0.5rem;
+  font-size: 1.6rem;
+  font-weight: 400;
+}
+
+.button--compact.button--operator {
+  background: transparent;
+  color: var(--color-primary);
+}
+
+.button--compact.button--number {
+  background: transparent;
+  color: var(--color-text);
+}
+
+.button--compact.button--clear {
+  background: transparent;
+  color: var(--color-warning);
+}
+
+.button--compact.button--equals {
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+  grid-column: span 2;
+  height: 45px;
+  width: 125px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button--compact:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+
+/* Ripple effect */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.6);
+  transform: scale(0);
+  animation: ripple-animation 0.6s ease-out;
+  pointer-events: none;
+}
+
+@keyframes ripple-animation {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
 }

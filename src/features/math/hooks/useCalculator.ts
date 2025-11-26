@@ -6,10 +6,17 @@ import {
   OPERATIONS,
   SPECIAL_VALUES,
 } from "../../../utils/constants";
-import { divide, multiply, subtract, add } from "../utils/operations";
-import { formatResult, formatInput } from "../utils/formatters";
-import { canAddDecimal, isValidDigitInput } from "../utils/inputValidator";
-import { maxPrimeInRange } from "../utils/primeUtils";
+import {
+  add,
+  subtract,
+  multiply,
+  divide,
+  formatResult,
+  formatInput,
+  canAddDecimal,
+  isValidDigitInput,
+  maxPrimeInRange,
+} from "../utils/helpers";
 
 export type Operator = typeof OPERATIONS[keyof typeof OPERATIONS] | null;
 

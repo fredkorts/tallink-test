@@ -1,0 +1,12 @@
+.calculator {
+  gap: 1rem;
+  width: 100%;
+}
+
+.displayArea {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  height: 220px;
+}

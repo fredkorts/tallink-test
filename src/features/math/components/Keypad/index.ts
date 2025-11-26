@@ -1,2 +1,2 @@
 export { default } from "./Keypad";
-export type { KeypadProps } from "../../types/calculator.types";
+export type { KeypadProps } from "./Keypad";

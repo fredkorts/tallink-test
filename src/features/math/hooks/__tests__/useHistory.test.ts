@@ -1,10 +1,20 @@
 import { renderHook, act } from '@testing-library/react';
 import useHistory from '../useHistory';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('useHistory', () => {
   beforeEach(() => {
     window.localStorage.clear();
+    globalThis.fetch = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        status: 200,
+        headers: {
+          get: () => "application/json",
+        },
+        json: () => Promise.resolve({}),
+      })
+    ) as unknown as typeof fetch;
   });
 
   it('initializes with empty history', () => {

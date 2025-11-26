@@ -5,7 +5,6 @@
   height: 340px;
   background: #F3EEEE;
   border-radius: var(--radius-lg);
-  ;
 }
 
 .row {
@@ -14,55 +13,9 @@
   gap: 0.5rem;
 }
 
-.button {
-  padding: 0.5rem;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--color-text);
-  font-size: 1.6rem;
-  cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.2s ease;
-}
-
-.button:focus-visible {
-  box-shadow: var(--shadow-md);
-  outline: none;
-}
-
-.button:active {
-  transform: translateY(1px);
-}
-
-.operator {
-  background: transparent;
-  color: var(--color-primary);
-}
-
+/* Special styling for equals button in math mode */
 .equals {
-  background: var(--color-accent);
   grid-column: span 2;
-  height: 45px;
-  width: 125px;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.clear {
-  background: transparent;
-  color: var(--color-warning);
-}
-
-.backspace {
-  background: transparent;
-  color: var(--color-primary);
-}
-
-.prime {
-  background: transparent;
-  color: var(--color-primary);
 }
 
 @media (max-width: 640px) {

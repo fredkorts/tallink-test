@@ -1,8 +1,21 @@
 import { formatTimeAgo } from "../../../../utils/timeFormatters";
-import { getAvailableCurrencies } from "../../utils/currencyHelpers";
-import type { CurrencyDisplayProps } from "../../types/currency.types";
+import { getAvailableCurrencies } from "../../utils/helpers";
 import useTimer from "../../../../hooks/useTimer";
 import styles from "./CurrencyDisplay.module.css";
+
+export interface CurrencyDisplayProps {
+    fromCurrency: string;
+    toCurrency: string;
+    currencies: string[];
+    ratesLoading: boolean;
+    ratesError: string | null;
+    onFromCurrencyChange: (currency: string) => void;
+    onToCurrencyChange: (currency: string) => void;
+    inputValue: string;
+    onInputValueChange: (val: string) => void;
+    outputValue: string;
+    timestamp: string | null;
+}
 
 /**
  * Display component for Currency Converter mode

@@ -1,8 +1,0 @@
-.display {
-  border-radius: var(--radius-md);
-  padding: 1rem;
-  height: 220px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
